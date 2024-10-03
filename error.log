@@ -1,0 +1,5 @@
+2024-09-30T06:47:14.354Z error: Error registering user: User validation failed: name: Path `name` is required.
+2024-09-30T06:48:13.994Z error: Error registering user: User validation failed: name: Path `name` is required.
+2024-10-02T14:16:24.878Z error: Error sending OTP: Unauthorized
+2024-10-02T14:16:41.088Z error: Error sending OTP: Unauthorized
+2024-10-02T14:19:54.427Z error: Error sending OTP: Unauthorized

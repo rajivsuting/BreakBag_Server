@@ -1,0 +1,8 @@
+2024-09-25T06:54:35.601Z [ERROR]: Error registering user: Illegal arguments: undefined, number
+2024-09-25T10:10:36.531Z [ERROR]: Error registering user: User validation failed: role: `admin` is not a valid enum value for path `role`.
+2024-09-25T10:14:47.947Z [ERROR]: Error sending OTP: Unauthorized
+2024-09-25T10:15:16.336Z [ERROR]: Error sending OTP: Unauthorized
+2024-09-25T10:23:27.355Z [ERROR]: Error sending OTP: read ECONNRESET
+2024-09-25T10:23:37.952Z [ERROR]: Error sending OTP: Unauthorized
+2024-09-25T10:26:03.041Z [ERROR]: Error sending OTP: Unauthorized
+2024-09-25T10:28:42.572Z [ERROR]: Error sending OTP: Unauthorized
