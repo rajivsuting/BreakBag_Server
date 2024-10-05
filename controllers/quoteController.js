@@ -83,3 +83,38 @@ exports.getAllQuotes = async (req, res) => {
       .json({ message: "Error fetching quotes", error: err.message });
   }
 };
+
+exports.getQuoteByTripId = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+
+    // Validate if tripId is provided
+    if (!tripId) {
+      return res.status(400).json({ message: "Trip ID is required." });
+    }
+
+    // Fetch the quote by tripId from the database
+    const quote = await Quote.findOne({ tripId }).populate(
+      "travellers destination"
+    );
+
+    // If no quote is found, return a 404 response
+    if (!quote) {
+      return res
+        .status(404)
+        .json({ message: `No quote found for Trip ID: ${tripId}` });
+    }
+
+    // Send a success response with the quote data
+    return res.status(200).json({
+      message: "Quote retrieved successfully",
+      data: quote,
+    });
+  } catch (err) {
+    console.error("Error retrieving quote:", err);
+    return res.status(500).json({
+      message: "Error retrieving quote",
+      error: err.message,
+    });
+  }
+};
