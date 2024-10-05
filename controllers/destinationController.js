@@ -31,3 +31,26 @@ exports.createDestination = async (req, res) => {
       .json({ message: "Error creating destination", error: err.message });
   }
 };
+
+exports.getAllDestinations = async (req, res) => {
+  try {
+    const destinations = await Destination.findAll();
+
+    if (!destinations || destinations.length === 0) {
+      return res.status(404).json({
+        message: "No destinations found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Destinations retrieved successfully",
+      data: destinations,
+    });
+  } catch (err) {
+    console.error("Error retrieving destinations:", err);
+    return res.status(500).json({
+      message: "Error retrieving destinations",
+      error: err.message,
+    });
+  }
+};

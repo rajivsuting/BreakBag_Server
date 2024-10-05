@@ -2,7 +2,7 @@ const Quote = require("../models/quote");
 
 exports.createQuote = async (req, res) => {
   try {
-    const { travellers, destination, travelDates, duration, status } = req.body;
+    const { travellers, destination, startDate, endDate, status } = req.body;
 
     // Validate required fields
     if (!travellers || travellers.length === 0) {
@@ -13,25 +13,38 @@ exports.createQuote = async (req, res) => {
     if (!destination) {
       return res.status(400).json({ message: "Destination is required." });
     }
-    if (!travelDates || travelDates.length === 0) {
+    if (!startDate || startDate.length === 0) {
       return res
         .status(400)
-        .json({ message: "At least one travel date is required." });
+        .json({ message: "At least one start date is required." });
     }
-    if (!duration || duration < 1) {
+    if (!endDate || endDate.length === 0) {
       return res
         .status(400)
-        .json({ message: "Duration must be at least 1 day." });
+        .json({ message: "At least one end date is required." });
     }
+
+    // Calculate duration in days (difference between startDate and endDate)
+    const start = new Date(startDate[0]);
+    const end = new Date(endDate[0]);
+
+    if (end < start) {
+      return res
+        .status(400)
+        .json({ message: "End date must be after start date." });
+    }
+
+    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Calculate duration in days (including both start and end date)
 
     // Create a new quote record in the database
     const newQuote = await Quote.create({
       travellers,
       destination,
       numberOfTravellers: travellers.length, // Set number of travellers dynamically
-      travelDates,
-      duration,
-      status, // Set the initial status from the request body or use the default value
+      startDate,
+      endDate,
+      duration, // Calculated duration in days
+      status, // Set the status from the request body or use the default value
     });
 
     // Send a success response

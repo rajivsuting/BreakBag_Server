@@ -20,13 +20,18 @@ const quoteSchema = new Schema({
     min: 1,
   },
 
-  travelDates: [
+  startDate: [
     {
       type: Date,
       required: true,
     },
   ],
-
+  endDate: [
+    {
+      type: Date,
+      required: true,
+    },
+  ],
   duration: {
     type: Number,
     required: true,
@@ -35,7 +40,7 @@ const quoteSchema = new Schema({
 
   tripId: {
     type: String,
-    unique: true,
+    unique: true, //TRIP-0001
   },
 
   status: {
@@ -49,7 +54,7 @@ const quoteSchema = new Schema({
       "CNP",
       "Groups",
     ],
-    default: "Pending",
+    default: "Active",
     required: true,
   },
 });
