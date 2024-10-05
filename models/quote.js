@@ -20,18 +20,16 @@ const quoteSchema = new Schema({
     min: 1,
   },
 
-  startDate: [
-    {
-      type: Date,
-      required: true,
-    },
-  ],
-  endDate: [
-    {
-      type: Date,
-      required: true,
-    },
-  ],
+  startDate: {
+    type: Date,
+    required: true,
+  },
+
+  endDate: {
+    type: Date,
+    required: true,
+  },
+
   duration: {
     type: Number,
     required: true,
