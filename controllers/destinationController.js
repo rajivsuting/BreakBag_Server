@@ -34,7 +34,7 @@ exports.createDestination = async (req, res) => {
 
 exports.getAllDestinations = async (req, res) => {
   try {
-    const destinations = await Destination.findAll();
+    const destinations = await Destination.find();
 
     if (!destinations || destinations.length === 0) {
       return res.status(404).json({

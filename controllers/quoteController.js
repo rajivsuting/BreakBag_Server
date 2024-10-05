@@ -2,7 +2,7 @@ const Quote = require("../models/quote");
 
 exports.createQuote = async (req, res) => {
   try {
-    const { travellers, destination, startDate, endDate, status } = req.body;
+    const { travellers, destination, startDate, endDate } = req.body;
 
     // Validate required fields
     if (!travellers || travellers.length === 0) {
@@ -44,7 +44,7 @@ exports.createQuote = async (req, res) => {
       startDate,
       endDate,
       duration, // Calculated duration in days
-      status, // Set the status from the request body or use the default value
+      // Set the status from the request body or use the default value
     });
 
     // Send a success response
