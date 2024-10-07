@@ -2,7 +2,7 @@ const OtherInformation = require("../models/otherInformation");
 
 exports.createOtherInformation = async (req, res) => {
   try {
-    const { itemList } = req.body; // Extract itemList from the request body
+    const { itemList, destination } = req.body; // Extract itemList from the request body
 
     if (!itemList || itemList.length === 0) {
       return res.status(400).json({ message: "No items provided." });
@@ -10,7 +10,7 @@ exports.createOtherInformation = async (req, res) => {
 
     // Create a new OtherInformation record in the database
     const newOtherInformation = await OtherInformation.create({
-      itemList,
+      itemList, destination
     });
 
     // Send a success response
@@ -31,7 +31,7 @@ exports.createOtherInformation = async (req, res) => {
 
 exports.getAllOtherInformation = async (req, res) => {
   try {
-    const otherInformationList = await OtherInformation.find(); // Fetch all records from the database
+    const otherInformationList = await OtherInformation.find().populate("destination", "title");; // Fetch all records from the database
 
     if (otherInformationList.length === 0) {
       return res.status(404).json({ message: "No other information found." });
@@ -50,5 +50,35 @@ exports.getAllOtherInformation = async (req, res) => {
         message: "Error fetching other information",
         error: err.message,
       });
+  }
+};
+
+
+exports.getOtherinformationByDestination = async (req, res) => {
+  try {
+    const { destination } = req.params; // Get destination from request parameters
+
+    if (!destination) {
+      return res.status(400).json({ message: "Destination is required." });
+    }
+
+    const otherInformation = await OtherInformation.findOne({ destination });
+
+    if (otherInformation.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No otherInformation found for this destination." });
+    }
+
+    return res.status(200).json({
+      message: "Otherinformation retrieved successfully",
+      data: otherInformation,
+    });
+  } catch (err) {
+    console.error("Error retrieving Otherinformation:", err);
+    return res.status(500).json({
+      message: "Error retrieving Otherinformation",
+      error: err.message,
+    });
   }
 };

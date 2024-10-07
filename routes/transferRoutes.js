@@ -18,4 +18,9 @@ router.get(
   transferController.getAllTransfers
 );
 
+router.get(
+  "/destination/:destination",
+  transferController.getTransferByDestination
+);
+
 module.exports = router;

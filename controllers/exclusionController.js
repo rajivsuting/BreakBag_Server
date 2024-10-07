@@ -29,7 +29,7 @@ exports.createExclusion = async (req, res) => {
 
 exports.getAllExclusions = async (req, res) => {
   try {
-    const exclusions = await Exclusion.find(); // Fetch all exclusions from the database
+    const exclusions = await Exclusion.find().populate("destination", "title"); // Fetch all exclusions from the database
 
     if (exclusions.length === 0) {
       return res.status(404).json({ message: "No exclusions found." });
@@ -56,7 +56,7 @@ exports.getExclusionByDestination = async (req, res) => {
       return res.status(400).json({ message: "Destination is required." });
     }
 
-    const exclusions = await Exclusion.find({ destination });
+    const exclusions = await Exclusion.findOne({ destination });
 
     if (exclusions.length === 0) {
       return res

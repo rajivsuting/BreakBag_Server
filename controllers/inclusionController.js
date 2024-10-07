@@ -11,10 +11,6 @@ exports.createInclusion = async (req, res) => {
 
     const imageUrls = files.map((file) => file.location);
 
-    if (!itemList || !Array.isArray(itemList) || itemList.length === 0) {
-      return res.status(400).json({ message: "Invalid or empty item list." });
-    }
-
     let parsedItemList;
     try {
       parsedItemList = JSON.parse(itemList);
@@ -43,7 +39,7 @@ exports.createInclusion = async (req, res) => {
 
 exports.getAllInclusions = async (req, res) => {
   try {
-    const inclusions = await Inclusion.find();
+    const inclusions = await Inclusion.find().populate("destination", "title");
 
     if (!inclusions || inclusions.length === 0) {
       return res.status(404).json({
@@ -73,7 +69,7 @@ exports.getInclusionByDestination = async (req, res) => {
       return res.status(400).json({ message: "Destination is required." });
     }
 
-    const inclusions = await Inclusion.find({ destination });
+    const inclusions = await Inclusion.findOne({ destination });
 
     if (inclusions.length === 0) {
       return res

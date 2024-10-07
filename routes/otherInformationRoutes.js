@@ -18,4 +18,9 @@ router.get(
   otherInformationController.getAllOtherInformation
 );
 
+router.get(
+  "/destination/:destination",
+  otherInformationController.getOtherinformationByDestination
+);
+
 module.exports = router;
