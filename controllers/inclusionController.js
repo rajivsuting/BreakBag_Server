@@ -2,7 +2,7 @@ const Inclusion = require("../models/inclusion");
 
 exports.createInclusion = async (req, res) => {
   try {
-    const { itemList } = req.body;
+    const { itemList, destination } = req.body;
     const files = req.files;
 
     if (!files || files.length === 0) {
@@ -25,6 +25,7 @@ exports.createInclusion = async (req, res) => {
     const newInclusion = await Inclusion.create({
       itemList: parsedItemList,
       images: imageUrls,
+      destination,
     });
 
     return res.status(201).json({
@@ -49,6 +50,35 @@ exports.getAllInclusions = async (req, res) => {
         message: "No inclusions found",
         data: [],
       });
+    }
+
+    return res.status(200).json({
+      message: "Inclusions retrieved successfully",
+      data: inclusions,
+    });
+  } catch (err) {
+    console.error("Error retrieving inclusions:", err);
+    return res.status(500).json({
+      message: "Error retrieving inclusions",
+      error: err.message,
+    });
+  }
+};
+
+exports.getInclusionByDestination = async (req, res) => {
+  try {
+    const { destination } = req.params; // Get destination from request parameters
+
+    if (!destination) {
+      return res.status(400).json({ message: "Destination is required." });
+    }
+
+    const inclusions = await Inclusion.find({ destination });
+
+    if (inclusions.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No inclusions found for this destination." });
     }
 
     return res.status(200).json({

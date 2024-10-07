@@ -2,7 +2,7 @@ const Exclusion = require("../models/exclusion");
 
 exports.createExclusion = async (req, res) => {
   try {
-    const { itemList } = req.body; // Extract itemList from the request body
+    const { itemList, destination } = req.body; // Extract itemList from the request body
 
     if (!itemList || itemList.length === 0) {
       return res.status(400).json({ message: "No items provided." });
@@ -11,6 +11,7 @@ exports.createExclusion = async (req, res) => {
     // Create a new exclusion record in the database
     const newExclusion = await Exclusion.create({
       itemList,
+      destination,
     });
 
     // Send a success response
@@ -44,5 +45,34 @@ exports.getAllExclusions = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error fetching exclusions", error: err.message });
+  }
+};
+
+exports.getExclusionByDestination = async (req, res) => {
+  try {
+    const { destination } = req.params; // Get destination from request parameters
+
+    if (!destination) {
+      return res.status(400).json({ message: "Destination is required." });
+    }
+
+    const exclusions = await Exclusion.find({ destination });
+
+    if (exclusions.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No exclusions found for this destination." });
+    }
+
+    return res.status(200).json({
+      message: "Exclusions retrieved successfully",
+      data: exclusions,
+    });
+  } catch (err) {
+    console.error("Error retrieving exclusions:", err);
+    return res.status(500).json({
+      message: "Error retrieving exclusions",
+      error: err.message,
+    });
   }
 };

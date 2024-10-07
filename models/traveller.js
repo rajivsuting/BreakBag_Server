@@ -23,6 +23,29 @@ const travellerSchema = new Schema({
     type: String,
     required: true,
   },
+
+  dateOfBirth: {
+    type: Date,
+    required: true,
+    validate: {
+      validator: function (value) {
+        return value < new Date();
+      },
+      message: "Date of birth must be a past date",
+    },
+  },
+
+  userType: {
+    type: String,
+    enum: ["Adult", "Child"],
+    required: true,
+  },
+
+  agentAssigned: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("Traveller", travellerSchema);

@@ -14,7 +14,7 @@ const handleErrors = (error, res, customMessage = null) => {
 
 // Create a Traveller
 exports.createTraveller = async (req, res) => {
-  const { name, email, phone, address } = req.body;
+  const { name, email, phone, address, dateOfBirth, userType } = req.body;
 
   if (!name || !email || !address) {
     return res
@@ -23,7 +23,14 @@ exports.createTraveller = async (req, res) => {
   }
 
   try {
-    const traveller = new Traveller({ name, email, phone, address });
+    const traveller = new Traveller({
+      name,
+      email,
+      phone,
+      address,
+      dateOfBirth,
+      userType,
+    });
     await traveller.save();
     res
       .status(201)

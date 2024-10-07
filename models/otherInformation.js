@@ -19,6 +19,10 @@ const otherInformationSchema = new Schema({
     type: [item],
     required: true,
   },
+  destination: {
+    type: Schema.Types.ObjectId,
+    ref: "Destination",
+  },
 });
 
 module.exports = mongoose.model("OtherInformation", otherInformationSchema);

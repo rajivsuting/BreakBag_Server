@@ -18,4 +18,9 @@ router.get(
   exclusionController.getAllExclusions
 );
 
+router.get(
+  "/destination/:destination",
+  exclusionController.getExclusionByDestination
+);
+
 module.exports = router;

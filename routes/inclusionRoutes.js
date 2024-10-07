@@ -20,4 +20,8 @@ router.get(
   inclusionController.getAllInclusions
 );
 
+router.get(
+  "/destination/:destination",
+  inclusionController.getInclusionByDestination
+);
 module.exports = router;

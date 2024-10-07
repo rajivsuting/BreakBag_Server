@@ -19,6 +19,10 @@ const exclusionSchema = new Schema({
     type: [item],
     required: true,
   },
+  destination: {
+    type: Schema.Types.ObjectId,
+    ref: "Destination",
+  },
 });
 
 module.exports = mongoose.model("Exclusion", exclusionSchema);
