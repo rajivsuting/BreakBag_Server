@@ -3,7 +3,7 @@ const logger = require("../config/logger");
 
 // Create a new Travel Summary
 exports.createTravelSummary = async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, destination } = req.body;
 
   // Validate required fields
   if (!title || !description) {
@@ -16,6 +16,7 @@ exports.createTravelSummary = async (req, res) => {
     const travelSummary = new TravelSummary({
       title,
       description,
+      destination,
     });
 
     await travelSummary.save();
@@ -34,9 +35,11 @@ exports.getAllTravelSummary = async (req, res) => {
 
   try {
     const travelSummaries = await TravelSummary.find()
+      .populate("destination", "title")
       .lean() // Performance optimization
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .populate("Destination");
 
     const total = await TravelSummary.countDocuments();
 

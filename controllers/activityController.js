@@ -3,7 +3,7 @@ const Activity = require("../models/activity");
 // Create a new activity
 exports.createActivity = async (req, res) => {
   try {
-    const { title, description } = req.body; // Extract title and description from the request body
+    const { title, description, destination } = req.body; // Extract title and description from the request body
     const files = req.files; // Get the uploaded files from the request
 
     if (!files || files.length === 0) {
@@ -17,7 +17,8 @@ exports.createActivity = async (req, res) => {
     const newActivity = await Activity.create({
       title,
       description,
-      images: imageUrls, // Store the array of image URLs in the database
+      images: imageUrls,
+      destination, // Store the array of image URLs in the database
     });
 
     // Send a success response
@@ -37,7 +38,7 @@ exports.createActivity = async (req, res) => {
 exports.getAllActivity = async (req, res) => {
   try {
     // Fetch all activities from the database
-    const activities = await Activity.find();
+    const activities = await Activity.find().populate("destination", "title");
 
     if (activities.length === 0) {
       return res.status(404).json({ message: "No activities found" });
