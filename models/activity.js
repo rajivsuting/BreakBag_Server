@@ -8,9 +8,8 @@ const activitySchema = new Schema({
     trim: true,
   },
   description: {
+    type: [String],
     required: true,
-    type: String,
-    trim: true,
   },
   images: {
     type: [String],
