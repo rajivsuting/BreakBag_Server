@@ -54,3 +54,34 @@ exports.getAllTravelSummary = async (req, res) => {
     res.status(500).json({ message: "Error fetching travel summaries", error });
   }
 };
+
+exports.searchTravelSummaryByDestination = async (req, res) => {
+  const { destination } = req.params;
+
+  // Validate required field
+  if (!destination) {
+    return res.status(400).json({ message: "Destination is required" });
+  }
+
+  try {
+    const travelSummaries = await TravelSummary.find({ destination });
+
+    if (travelSummaries.length === 0) {
+      return res
+        .status(404)
+        .json({
+          message: "No travel summaries found for the specified destination",
+        });
+    }
+
+    res.status(200).json({
+      message: "Travel Summaries retrieved successfully",
+      travelSummaries,
+    });
+  } catch (error) {
+    logger.error(`Error searching travel summaries: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error searching travel summaries", error });
+  }
+};

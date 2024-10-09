@@ -7,5 +7,9 @@ router.post("/travel-summary", travelSummaryController.createTravelSummary);
 
 // Get all Travel Summaries with Pagination
 router.get("/travel-summary", travelSummaryController.getAllTravelSummary);
+router.get(
+  "/travel-summary/search/:destination",
+  travelSummaryController.searchTravelSummaryByDestination
+);
 
 module.exports = router;

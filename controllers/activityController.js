@@ -56,3 +56,38 @@ exports.getAllActivity = async (req, res) => {
       .json({ message: "Error retrieving activities", error: err.message });
   }
 };
+
+exports.searchActivityByDestination = async (req, res) => {
+  const { destination } = req.params;
+
+  // Validate required field
+  if (!destination) {
+    return res.status(400).json({ message: "Destination is required" });
+  }
+
+  try {
+    // Use a case-insensitive regular expression to search for a substring match
+    const activities = await Activity.find({
+      destination: { $regex: destination, $options: "i" }, // 'i' for case-insensitive, regex allows partial match
+    });
+
+    if (activities.length === 0) {
+      return res
+        .status(404)
+        .json({
+          message: "No activities found matching the destination pattern",
+        });
+    }
+
+    res.status(200).json({
+      message:
+        "Activities matching the destination pattern retrieved successfully",
+      data: activities,
+    });
+  } catch (error) {
+    console.error(`Error searching activities: ${error.message}`);
+    res
+      .status(500)
+      .json({ message: "Error searching activities", error: error.message });
+  }
+};

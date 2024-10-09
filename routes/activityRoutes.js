@@ -4,6 +4,7 @@ const upload = require("../config/multerConfig"); // Multer config for handling 
 const {
   createActivity,
   getAllActivity,
+  searchActivityByDestination,
 } = require("../controllers/activityController");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
@@ -16,5 +17,7 @@ router.post(
 
 // Route to get all activities (accessible to everyone)
 router.get("/all", getAllActivity);
+
+router.get("/activity/search/:destination", searchActivityByDestination);
 
 module.exports = router;
