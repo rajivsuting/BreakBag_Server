@@ -10,4 +10,6 @@ router.get("/quotes", quoteController.getAllQuotes);
 
 router.get("/quotes/:tripId", quoteController.getQuoteByTripId);
 
+router.post("/:quoteId/comments", quoteController.createCommentOnQuote);
+
 module.exports = router;

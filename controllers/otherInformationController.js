@@ -2,15 +2,16 @@ const OtherInformation = require("../models/otherInformation");
 
 exports.createOtherInformation = async (req, res) => {
   try {
-    const { itemList, destination } = req.body; // Extract itemList from the request body
+    const { description, destination } = req.body; // Extract description from the request body
 
-    if (!itemList || itemList.length === 0) {
+    if (!description || description.length === 0) {
       return res.status(400).json({ message: "No items provided." });
     }
 
     // Create a new OtherInformation record in the database
     const newOtherInformation = await OtherInformation.create({
-      itemList, destination
+      description,
+      destination,
     });
 
     // Send a success response
@@ -20,18 +21,19 @@ exports.createOtherInformation = async (req, res) => {
     });
   } catch (err) {
     console.error("Error creating other information:", err);
-    return res
-      .status(500)
-      .json({
-        message: "Error creating other information",
-        error: err.message,
-      });
+    return res.status(500).json({
+      message: "Error creating other information",
+      error: err.message,
+    });
   }
 };
 
 exports.getAllOtherInformation = async (req, res) => {
   try {
-    const otherInformationList = await OtherInformation.find().populate("destination", "title");; // Fetch all records from the database
+    const otherInformationList = await OtherInformation.find().populate(
+      "destination",
+      "title"
+    ); // Fetch all records from the database
 
     if (otherInformationList.length === 0) {
       return res.status(404).json({ message: "No other information found." });
@@ -44,15 +46,12 @@ exports.getAllOtherInformation = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching other information:", err);
-    return res
-      .status(500)
-      .json({
-        message: "Error fetching other information",
-        error: err.message,
-      });
+    return res.status(500).json({
+      message: "Error fetching other information",
+      error: err.message,
+    });
   }
 };
-
 
 exports.getOtherinformationByDestination = async (req, res) => {
   try {

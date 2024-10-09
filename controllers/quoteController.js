@@ -118,3 +118,49 @@ exports.getQuoteByTripId = async (req, res) => {
     });
   }
 };
+
+exports.createCommentOnQuote = async (req, res) => {
+  try {
+    const { quoteId } = req.params;
+    const { comment } = req.body; // Assume this contains the comment content
+    const { userId } = req.user; // The logged-in user's ID
+
+    // Validate if quoteId is provided
+    if (!quoteId) {
+      return res.status(400).json({ message: "Quote ID is required." });
+    }
+
+    if (!comment) {
+      return res.status(400).json({ message: "Comment is required." });
+    }
+
+    // Fetch the quote by quoteId from the database
+    const quote = await Quote.findById(quoteId);
+    if (!quote) {
+      return res
+        .status(404)
+        .json({ message: `No quote found for Quote ID: ${quoteId}` });
+    }
+
+    // Add the comment to the quote's comments array
+    const newComment = {
+      content: comment, // Ensure this is the comment content
+      author: userId, // Reference to the user making the comment
+      createdAt: new Date(), // Date will default to `Date.now` in the schema, so you could omit this
+    };
+
+    quote.comments.push(newComment);
+    await quote.save();
+
+    // Send a success response with the updated quote data
+    return res.status(200).json({
+      message: "Comment created successfully",
+      data: quote,
+    });
+  } catch (err) {
+    console.error("Error creating comment on quote:", err);
+    return res
+      .status(500)
+      .json({ message: "Error creating comment on quote", error: err.message });
+  }
+};

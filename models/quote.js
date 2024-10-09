@@ -1,6 +1,22 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const commentSchema = new Schema({
+  content: {
+    type: String,
+    required: true,
+  },
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const quoteSchema = new Schema({
   travellers: [
     {
@@ -55,6 +71,7 @@ const quoteSchema = new Schema({
     default: "Active",
     required: true,
   },
+  comments: [commentSchema],
 });
 
 quoteSchema.pre("save", async function (next) {

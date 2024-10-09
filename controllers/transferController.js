@@ -2,15 +2,16 @@ const Transfer = require("../models/transfer");
 
 exports.createTransfer = async (req, res) => {
   try {
-    const { itemList, destination } = req.body; // Extract itemList from the request body
+    const { description, destination } = req.body; // Extract description from the request body
 
-    if (!itemList || itemList.length === 0) {
+    if (!description || description.length === 0) {
       return res.status(400).json({ message: "No items provided." });
     }
 
     // Create a new transfer record in the database
     const newTransfer = await Transfer.create({
-      itemList, destination
+      description,
+      destination,
     });
 
     // Send a success response
@@ -28,7 +29,7 @@ exports.createTransfer = async (req, res) => {
 
 exports.getAllTransfers = async (req, res) => {
   try {
-    const transfers = await Transfer.find().populate("destination", "title");; // Fetch all transfers from the database
+    const transfers = await Transfer.find().populate("destination", "title"); // Fetch all transfers from the database
 
     if (transfers.length === 0) {
       return res.status(404).json({ message: "No transfers found." });
@@ -46,7 +47,6 @@ exports.getAllTransfers = async (req, res) => {
       .json({ message: "Error fetching transfers", error: err.message });
   }
 };
-
 
 exports.getTransferByDestination = async (req, res) => {
   try {

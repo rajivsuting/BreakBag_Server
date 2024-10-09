@@ -1,7 +1,14 @@
 const PDFDocument = require("pdfkit");
 const axios = require("axios");
 const path = require("path");
-const { travelSummaryDemo, costData } = require("../data.js");
+const {
+  travelSummaryDemo,
+  costData,
+  detailedIteneraryData,
+  inclusionData,
+  exclusionsData,
+  otherInfoData,
+} = require("../data.js");
 
 // Helper function to fetch image data from a URL
 async function fetchImage(url) {
@@ -70,13 +77,13 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#123345")
+      .fillColor("#053260")
       .text(whyText, xPosition, 70, { continued: true });
 
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#fab701")
+      .fillColor("#ff9c00")
       .text(chooseText, xPosition - 11, chooseTextYPosition + 2, {
         continued: true,
       });
@@ -84,7 +91,7 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#123345")
+      .fillColor("#053260")
       .text(breakBagText, xPosition - 20, 70);
 
     doc.moveDown(1); // Add space below the heading
@@ -94,23 +101,38 @@ async function generatePDF(res) {
 
     // Add 6 paragraphs of dummy text, aligned left
     const paragraphs = [
-      "BreakBag is your premier choice for travel solutions. Our dedicated team focuses on providing exceptional customer service, ensuring that your journey is smooth and enjoyable.",
-      "With tailored itineraries, competitive pricing, and innovative solutions, we aim to exceed your expectations. Trust us to handle all your travel needs, from planning to execution.",
-      "Our commitment to quality ensures that every detail is taken care of. Join countless satisfied customers who have experienced the difference with BreakBag.",
-      "Choose us for an unforgettable travel experience that prioritizes your satisfaction and convenience. We understand that every traveler is unique, and we cater to your individual preferences.",
-      "From luxurious getaways to budget-friendly trips, our services are designed to meet your needs. Enjoy personalized itineraries that suit your schedule and interests.",
-      "Let BreakBag be your travel partner, guiding you through the best destinations while providing support at every step. Experience the joy of traveling with a team that cares about your journey.",
+      "Everyone may don the hat of a traveler, but it's the soulful connection with the destinations, an affection for the mountains, tha truly defines a Traveler.",
+      "Nearly a decade ago, BreakBag embarked on a mission to redefine travel, offering a novel approach to exploration. Our vision was simple: to democratize travel, making it accessible to all who dream of traversing the globe,",
+      "In an era where communal travel was gaining momentum, our focus remained steadfast: to provide exceptional travel experiences without compromising on affordability.",
+      "Specializing in both group departures and tailor-made journeys, BreakBag caters to wanderlust seekers seeking adventures across international and domestic landscapes, including bespoke corporate outings.",
+      "At BreakBag, our mission is clear: to deliver unparalleled trvel experiences to our clients. From meticulously selecting the most exceptional accommodations to curating delectable dining options, we spare no effort in ensuring every aspect of your journey exceeds expectations.",
+      "Drawing inspiration from out profound love for the beaches to mountains, we seek to impart the invaluable lessons and breathtaking experiences they have bestowed upon us to each and every one of our clients",
     ];
 
     // Loop through paragraphs and add them to the PDF
-    for (const para of paragraphs) {
-      doc
-        .moveDown(1) // Move down for spacing between paragraphs
-        .text(para, 70, doc.y, {
-          align: "justify",
-          width: doc.page.width - 2 * 70,
-        });
-    }
+    paragraphs.forEach((para, index) => {
+      if (index === 0) {
+        // For the first paragraph, add quotation marks, make it italic and bold
+        doc
+          .moveDown(1)
+          .font("Times-BoldItalic")
+          .fontSize(14)
+          .text(`“${para}”`, 70, doc.y, {
+            align: "justify",
+            width: doc.page.width - 2 * 70,
+          });
+      } else {
+        // For the other paragraphs, regular formatting
+        doc
+          .moveDown(1)
+          .font("Times-Roman")
+          .fontSize(14)
+          .text(para, 70, doc.y, {
+            align: "justify",
+            width: doc.page.width - 2 * 70,
+          });
+      }
+    });
 
     const rectHeight = 50; // Height of the rectangle
     const rectYPosition = doc.page.height - padding - rectHeight - 120; // Position of the rectangle
@@ -118,13 +140,13 @@ async function generatePDF(res) {
     // Calculate the midpoint to divide the rectangle into two halves
     const rectMidPoint = doc.page.width / 2;
 
-    // Draw the left half of the rectangle with color #123345
-    doc.rect(0, rectYPosition, rectMidPoint, rectHeight).fill("#123345");
+    // Draw the left half of the rectangle with color #053260
+    doc.rect(0, rectYPosition, rectMidPoint, rectHeight).fill("#053260");
 
-    // Draw the right half of the rectangle with color #fab701
+    // Draw the right half of the rectangle with color #ff9c00
     doc
       .rect(rectMidPoint, rectYPosition, rectMidPoint, rectHeight)
-      .fill("#fab701");
+      .fill("#ff9c00");
 
     // Add "Our Rating" text centered in the left half of the rectangle
     doc
@@ -198,7 +220,7 @@ async function generatePDF(res) {
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#fab701")
+      .fillColor("#ff9c00")
       .text(briefText, headingXPosition, briefYPosition - 5, {
         continued: true,
       });
@@ -207,7 +229,7 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#123345")
+      .fillColor("#053260")
       .text(
         itineraryText,
         headingXPosition + briefTextWidth - 70, // Adjusted X position for "ITINERARY"
@@ -222,7 +244,7 @@ async function generatePDF(res) {
       .stroke(); // Render the line
 
     // Define the start date and total days
-    const startDate = "2024-10-01"; // Example start date
+    const startDate = "2024-10-02"; // Example start date
     const totalDays = travelSummaryDemo.length; // Number of days from the travel summary
 
     doc
@@ -232,7 +254,7 @@ async function generatePDF(res) {
 
     // Add the new fields below the horizontal line
     const startDate2 = `Start Date : ${startDate}`; // Example start date
-    const endDate = "End Date: 2024-10-05"; // Example end date
+    const endDate = "End Date: 2024-10-06"; // Example end date
     const destination = "Destination: Paris"; // Example destination
 
     // Set font for the new fields
@@ -290,7 +312,7 @@ async function generatePDF(res) {
 
       // Draw the rectangle background for the day text
       doc
-        .fillColor("#123345") // Set the fill color to black
+        .fillColor("#053260") // Set the fill color to black
         .rect(padding - 5, rectYPosition, dayWidth, rectHeight) // Define the rectangle dimensions
         .fill(); // Fill the rectangle
 
@@ -341,7 +363,7 @@ async function generatePDF(res) {
       const lineStartY = currentYPosition; // Starting Y position
       const lineEndY = currentYPosition + summaryHeight; // Ending Y position
       doc
-        .strokeColor("#fab701")
+        .strokeColor("#ff9c00")
         .moveTo(lineXPosition, lineStartY)
         .lineTo(lineXPosition, lineEndY)
 
@@ -382,7 +404,7 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#123345") // Set the color for "Tour"
+      .fillColor("#053260") // Set the color for "Tour"
       .text(tourText, costHeadingXPosition, tourYPosition, {
         continued: true, // To print "Cost" on the same line
       });
@@ -391,7 +413,7 @@ async function generatePDF(res) {
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#fab701") // Set the color for "Cost"
+      .fillColor("#ff9c00") // Set the color for "Cost"
       .text(
         costText,
         costHeadingXPosition + tourTextWidth - 98,
@@ -402,7 +424,7 @@ async function generatePDF(res) {
     doc.moveDown(0); // Add some space
 
     // Define colors for table headers
-    const headerBackgroundColor = "#123345";
+    const headerBackgroundColor = "#053260";
     const headerTextColor = "#ffffff"; // White text for contrast
 
     const headers = ["User Type", "Price", "Quantity", "Amount"];
@@ -505,7 +527,7 @@ async function generatePDF(res) {
         align: "center", // Horizontal centering
       });
       doc.text(
-        `₹${row.price.toLocaleString("en-IN")}`,
+        `${row.price.toLocaleString("en-IN")}`,
         startX + columnWidths[0],
         currentY + verticalOffset,
         { width: columnWidths[1], align: "center" } // Horizontal centering
@@ -517,7 +539,7 @@ async function generatePDF(res) {
         { width: columnWidths[2], align: "center" } // Horizontal centering
       );
       doc.text(
-        `₹${row.amount.toLocaleString("en-IN")}`,
+        `${row.amount.toLocaleString("en-IN")}`,
         startX + columnWidths[0] + columnWidths[1] + columnWidths[2],
         currentY + verticalOffset,
         { width: columnWidths[3], align: "center" } // Horizontal centering
@@ -538,6 +560,7 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(14)
+      .fillColor("#053260")
       .text(
         "Total Amount",
         startX,
@@ -549,18 +572,447 @@ async function generatePDF(res) {
       );
 
     // Display the total amount in the last column
-    doc.text(
-      `${totalAmount.toLocaleString("en-IN")}`,
-      startX + columnWidths.slice(0, 3).reduce((a, b) => a + b, 0),
-      currentY + getVerticalOffset(14, totalRowHeight),
-      { width: columnWidths[3], align: "center" }
-    );
+    doc
+      .fillColor("black")
+      .text(
+        `${totalAmount.toLocaleString("en-IN")}`,
+        startX + columnWidths.slice(0, 3).reduce((a, b) => a + b, 0),
+        currentY + getVerticalOffset(14, totalRowHeight),
+        { width: columnWidths[3], align: "center" }
+      );
 
     // Draw the last row border with the total amount, skipping the second and third columns
     drawRow(currentY, totalRowHeight, 4, ["col1", "col2", "bottom"]); // Skip borders for the second and third columns and bottom
 
     // Adjust the Y position for future content
     currentY += totalRowHeight;
+
+    const hotelText = "HOTEL";
+    const infoText = "Information";
+
+    // Set font for "Tour" and calculate its width
+    doc.font("Times-Bold").fontSize(32);
+    const hotelTextWidth = doc.widthOfString(hotelText);
+
+    // Set font for "Cost" using Sacramento and calculate its width
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const infoTextWidth = doc.widthOfString(infoText);
+
+    const hotelInfoHeadingWidth = hotelTextWidth + infoTextWidth;
+    const InfoXPosition = (doc.page.width - hotelInfoHeadingWidth) / 2;
+
+    const hotelYPosition = 300; // Adjust the Y position as needed
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "Tour"
+      .text(hotelText, costHeadingXPosition - 50, hotelYPosition, {
+        continued: true, // To print "Cost" on the same line
+      });
+
+    // Print "Cost" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "Cost"
+      .text(
+        infoText,
+        costHeadingXPosition + tourTextWidth - 145,
+        hotelYPosition - 14
+      );
+
+    let dayCount = 1;
+    // start the detailed itenerary from here
+    for (const item of detailedIteneraryData) {
+      // Add a new page for each itinerary item
+      doc.addPage();
+
+      // Add the same logo on the top right of each page
+      doc.image(logoImage, doc.page.width - padding - 100, padding, {
+        fit: [100, 100],
+      });
+
+      const rectDayHeight = 40;
+      const rectDayWidth = 120; // Width of the rectangle
+      const rectDayYPosition = doc.page.height - padding - rectDayHeight - 710; // Position of the rectangle
+
+      // Draw the rectangle with color #ff9c00
+      doc
+        .rect(0, rectDayYPosition, rectDayWidth, rectDayHeight)
+        .fill("#ff9c00");
+
+      // Add the text "DAY 1" centered in the rectangle
+      doc
+        .font("Times-Bold") // Set the font
+        .fontSize(24) // Set the font size
+        .fillColor("white") // Set the text color
+        .text(
+          `DAY ${dayCount}`,
+          0,
+          rectDayYPosition + 10 + rectDayHeight / 2 - 9,
+          {
+            // Position the text in the center of the rectangle
+            width: rectDayWidth,
+            align: "center", // Center align the text
+            baseline: "middle", // Ensure vertical centering
+          }
+        );
+      dayCount++;
+      // Set initial Y position
+      let currentY = padding + 100;
+
+      // Set the widths for the images
+      const largeImageWidth = doc.page.width * 0.7 - 2 * padding; // 69% of the page width for the large image
+      const sidebarWidth = doc.page.width * 0.385 - 2 * padding; // Adjusted sidebar width for better alignment
+      const largeImageHeight = 390; // Set a fixed height for the large image
+      const sidebarImageHeight = largeImageHeight / 2.5; // Adjust the height of the sidebar images, no gap subtraction
+
+      const largeImageYPosition = currentY; // Position for the large image
+      const sidebarImage1YPosition = largeImageYPosition; // Align the first sidebar image with the large image
+      const sidebarImage2YPosition =
+        sidebarImage1YPosition - 31 + sidebarImageHeight; // Directly place the second sidebar image below the first one
+
+      // Fetch the first (large) image
+      const largeImageUrl = item.images[0];
+      const largeImageData = await fetchImage(largeImageUrl);
+
+      // Add the large image to the left (69% of the width)
+      doc.image(largeImageData, padding, largeImageYPosition, {
+        fit: [largeImageWidth, largeImageHeight],
+      });
+
+      // Fetch the second and third (sidebar) images if they exist
+      if (item.images[1]) {
+        const sidebarImage1Url = item.images[1];
+        const sidebarImage1Data = await fetchImage(sidebarImage1Url);
+
+        // Add the first sidebar image (aligned with the large image, 31% of width)
+        doc.image(
+          sidebarImage1Data,
+          padding + largeImageWidth + 10, // Position to the right of the large image with minimal gap
+          sidebarImage1YPosition,
+          {
+            fit: [sidebarWidth, sidebarImageHeight],
+          }
+        );
+      }
+
+      if (item.images[2]) {
+        const sidebarImage2Url = item.images[2];
+        const sidebarImage2Data = await fetchImage(sidebarImage2Url);
+
+        // Add the second sidebar image directly below the first sidebar image
+        doc.image(
+          sidebarImage2Data,
+          padding + largeImageWidth + 10, // Position to the right of the large image with minimal gap
+          sidebarImage2YPosition,
+          {
+            fit: [sidebarWidth, sidebarImageHeight],
+          }
+        );
+      }
+
+      // Update currentY after images
+      currentY = largeImageYPosition + largeImageHeight - 100; // Adjust the currentY after images
+
+      // Add the title below the images
+      doc
+        .font("Times-Bold")
+        .fontSize(24)
+        .fillColor("#053260")
+        .text(item.title, padding, currentY, {
+          align: "left",
+          width: doc.page.width - 2 * padding,
+        });
+
+      currentY += 35; // Update Y position after title
+
+      // Define maximum width for the text wrapping (you can adjust this based on your layout)
+      const maxWidth = doc.page.width - 2 * padding - 20; // Leave space for the bullet point indentation
+      const bulletPointIndent = 35; // X position for the bullet point
+      const descriptionIndent = bulletPointIndent + 10; // Indentation for the description text
+
+      // Loop through the description array and print each item with a bullet point
+      item.description.forEach((desc) => {
+        // Set the bullet point character (•)
+        const bulletPoint = "• ";
+
+        // Set the font size and color for bullet points
+        doc
+          .font("Times-Roman") // Change font as needed
+          .fontSize(14) // Set font size to 14
+          .fillColor("black"); // Set the color for the text
+
+        // Print the bullet point first
+        doc.text(bulletPoint, bulletPointIndent, currentY);
+
+        // Print the description next to the bullet point with automatic text wrapping
+        doc.text(desc, descriptionIndent, currentY, {
+          width: maxWidth, // Set max width for text wrapping
+          lineGap: 5, // Set line height between lines of text
+        });
+
+        // Calculate the height of the wrapped text
+        const itemHeight = doc.heightOfString(desc, { width: maxWidth });
+
+        // Increment the Y position for the next bullet point, based on the height of the current item
+        currentY += itemHeight + 19; // Add spacing between items
+      });
+    }
+    // --------TRIP Inclusion ---------------------------
+
+    doc.addPage();
+
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    const TRIPText = "TRIP";
+    const inclusionsText = " Inclusions";
+
+    // Set font for "TRIP" and calculate its width
+    doc.font("Times-Bold").fontSize(32);
+    const TRIPTextWidth = doc.widthOfString(TRIPText);
+
+    // Set font for "inclusions" using Sacramento and calculate its width
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const inclusionsTextWidth = doc.widthOfString(inclusionsText);
+
+    // Calculate total width of the "TRIP inclusions" text
+    const totalinclusionsHeadingWidth = TRIPTextWidth + inclusionsTextWidth;
+
+    // Set X position to start from the left side of the page
+    const inclusionsHeadingXPosition = 0;
+
+    // Print "TRIP" with a regular bold font
+    const TRIPYPosition = 70; // Adjust the Y position as needed
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "TRIP"
+      .text(TRIPText, inclusionsHeadingXPosition + 30, TRIPYPosition, {
+        continued: true, // To print "inclusions" on the same line
+      });
+
+    // Print "inclusions" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "inclusions"
+      .text(
+        inclusionsText,
+        inclusionsHeadingXPosition + TRIPTextWidth - 54,
+        TRIPYPosition - 15
+      ); // Adjusted to start from the left
+
+    // Draw a horizontal line below the heading
+    const inclusionsLineYPosition = TRIPYPosition + 35; // Adjust the Y position below the text
+
+    // Increase the length of the line by 50 units
+    const lineLengthIncrease = 50;
+    doc
+      .moveTo(inclusionsHeadingXPosition - 25, inclusionsLineYPosition) // Start point of the line (moved left by 25)
+      .lineTo(
+        inclusionsHeadingXPosition + totalinclusionsHeadingWidth + 25, // End point of the line (moved right by 25)
+        inclusionsLineYPosition
+      ) // Keep the Y position the same
+      .lineWidth(1) // Set the thickness of the line
+      .strokeColor("#000000") // Set the color of the line (black in this case)
+      .stroke(); // Draw the line
+
+    let inclusionY = 150; // Initial Y position for inclusion data
+
+    // Iterate through each item in the inclusionData.itemList
+    for (let i = 0; i < inclusionData.itemList.length; i++) {
+      const item = inclusionData.itemList[i];
+
+      // Set the title color based on the index (even or odd)
+      const titleColor = i % 2 === 0 ? "#053260" : "#ff9c00";
+
+      // Print the title of the item
+      doc
+        .font("Times-Bold")
+        .fontSize(24)
+        .fillColor(titleColor) // Set color based on index
+        .text(`${item.title} :`, padding + 7, inclusionY, {
+          align: "left",
+        });
+
+      inclusionY = doc.y + 10; // Update Y position after title
+
+      // Print the description in bullet points
+      for (const desc of item.description) {
+        doc
+          .font("Times-Roman")
+          .fontSize(14)
+          .fillColor("#000000")
+          .text(`• ${desc}`, padding + 27, inclusionY, {
+            align: "left",
+            width: doc.page.width - 2 * padding,
+          });
+
+        inclusionY = doc.y + 5; // Update Y position after each bullet point
+      }
+
+      inclusionY = doc.y + 15; // Add some space before the next item
+    }
+    doc.addPage();
+
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    const exclusionsText = " Exclusions";
+
+    // Set font for "TRIP" and calculate its width
+    doc.font("Times-Bold").fontSize(32);
+
+    // Set font for "exclusions" using Sacramento and calculate its width
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const exclusionsTextWidth = doc.widthOfString(exclusionsText);
+
+    // Calculate total width of the "TRIP exclusions" text
+    const totalexclusionsHeadingWidth = TRIPTextWidth + exclusionsTextWidth;
+
+    // Set X position to start from the left side of the page
+    const exclusionsHeadingXPosition = 0;
+
+    // Print "TRIP" with a regular bold font
+    // Adjust the Y position as needed
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "TRIP"
+      .text(TRIPText, exclusionsHeadingXPosition + 30, TRIPYPosition, {
+        continued: true, // To print "exclusions" on the same line
+      });
+
+    // Print "exclusions" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "exclusions"
+      .text(
+        exclusionsText,
+        exclusionsHeadingXPosition + TRIPTextWidth - 54,
+        TRIPYPosition - 15
+      ); // Adjusted to start from the left
+
+    // Draw a horizontal line below the heading
+    const exclusionsLineYPosition = TRIPYPosition + 35; // Adjust the Y position below the text
+
+    // Increase the length of the line by 50 units
+    // const lineLengthIncrease = 50;
+    doc
+      .moveTo(exclusionsHeadingXPosition - 25, exclusionsLineYPosition) // Start point of the line (moved left by 25)
+      .lineTo(
+        exclusionsHeadingXPosition + totalexclusionsHeadingWidth + 25, // End point of the line (moved right by 25)
+        exclusionsLineYPosition
+      ) // Keep the Y position the same
+      .lineWidth(1) // Set the thickness of the line
+      .strokeColor("#000000") // Set the color of the line (black in this case)
+      .stroke(); // Draw the line
+
+    // Set the starting Y position for the bullet points
+    let bulletPointYPosition = inclusionsLineYPosition + 35; // Adjust as needed
+
+    // Define maximum width for the text wrapping (you can adjust this based on your layout)
+    const maxWidth = 500;
+
+    // Loop through each description and print it with a bullet point
+    exclusionsData.description.forEach((item) => {
+      // Set the bullet point character (•)
+      const bulletPoint = "• ";
+
+      // Set the font size and color for bullet points
+      doc
+        .font("Times-Roman") // Change font as needed
+        .fontSize(14) // Set font size to 14
+        .fillColor("#black"); // Set the color for the text
+
+      // Print the bullet point first
+      doc.text(bulletPoint, 35, bulletPointYPosition);
+
+      // Print the description next to the bullet point with automatic text wrapping
+      doc.text(item, 45, bulletPointYPosition, {
+        width: maxWidth, // Set max width for text wrapping
+        lineGap: 5, // Set line height between lines of text
+      });
+
+      // Calculate the height of the wrapped text
+      const itemHeight = doc.heightOfString(item, { width: maxWidth });
+
+      // Increment the Y position for the next bullet point, based on the height of the current item
+      bulletPointYPosition += itemHeight + 19; // Add spacing between items
+    });
+
+    doc.addPage();
+
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    const OTHERText = "OTHER";
+    const informationText = "Information";
+
+    // Set font for "OTHER" and calculate its width
+    doc.font("Times-Bold").fontSize(32);
+    const OTHERTextWidth = doc.widthOfString(OTHERText);
+
+    // Set font for "information" using Sacramento and calculate its width
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const informationTextWidth = doc.widthOfString(informationText);
+
+    // Calculate total width of the "OTHER information" text
+    const totalinformationHeadingWidth = OTHERTextWidth + informationTextWidth;
+
+    // Set X position to start from the left side of the page
+    const informationHeadingXPosition = 0;
+
+    // Print "OTHER" with a regular bold font
+    const OTHERYPosition = 70; // Adjust the Y position as needed
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "OTHER"
+      .text(OTHERText, informationHeadingXPosition + 30, OTHERYPosition, {
+        continued: true, // To print "information" on the same line
+      });
+
+    // Print "information" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "information"
+      .text(
+        informationText,
+        informationHeadingXPosition + OTHERTextWidth - 75,
+        OTHERYPosition - 15
+      ); // Adjusted to start from the left
+
+    // Draw a horizontal line below the heading
+    const informationLineYPosition = OTHERYPosition + 35; // Adjust the Y position below the text
+
+    // Increase the length of the line by 50 units (25 on each side)
+    // const lineLengthIncrease = 50;
+
+    doc
+      .moveTo(informationHeadingXPosition - 40, informationLineYPosition) // Start point of the line (moved left by 25)
+      .lineTo(
+        informationHeadingXPosition + totalinformationHeadingWidth + 40, // End point of the line (moved right by 25)
+        informationLineYPosition
+      ) // Keep the Y position the same
+      .lineWidth(1) // Set the thickness of the line
+      .strokeColor("#000000") // Set the color of the line (black in this case)
+      .stroke(); // Draw the line
 
     doc.end();
   } catch (error) {
