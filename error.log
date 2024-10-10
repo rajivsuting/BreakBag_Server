@@ -3,3 +3,10 @@
 2024-10-02T14:16:24.878Z error: Error sending OTP: Unauthorized
 2024-10-02T14:16:41.088Z error: Error sending OTP: Unauthorized
 2024-10-02T14:19:54.427Z error: Error sending OTP: Unauthorized
+2024-10-10T12:05:52.489Z error: Error creating traveller
+2024-10-10T12:05:59.273Z error: Error creating traveller
+2024-10-10T12:06:36.204Z error: Error fetching travel summaries: read ECONNRESET
+2024-10-10T12:06:36.278Z error: Error fetching travel summaries: read ECONNRESET
+2024-10-10T12:07:48.970Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.
+2024-10-10T12:07:55.890Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.
+2024-10-10T12:07:56.101Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.

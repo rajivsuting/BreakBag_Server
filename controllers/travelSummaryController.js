@@ -38,8 +38,7 @@ exports.getAllTravelSummary = async (req, res) => {
       .populate("destination", "title")
       .lean() // Performance optimization
       .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .populate("Destination");
+      .limit(parseInt(limit));
 
     const total = await TravelSummary.countDocuments();
 
@@ -67,11 +66,9 @@ exports.searchTravelSummaryByDestination = async (req, res) => {
     const travelSummaries = await TravelSummary.find({ destination });
 
     if (travelSummaries.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No travel summaries found for the specified destination",
-        });
+      return res.status(404).json({
+        message: "No travel summaries found for the specified destination",
+      });
     }
 
     res.status(200).json({

@@ -49,13 +49,27 @@ async function generatePDF(res) {
     // --- First Page ---
 
     // Fetch the logo image from the URL
-    const logoUrl =
-      "https://breakbag.com/static/media/logo.3fff3126fefbf4f3afe7.png";
-    const logoImage = await fetchImage(logoUrl);
+    // const logoUrl =
+    //   "https://breakbag.com/static/media/logo.3fff3126fefbf4f3afe7.png";
+    // const logoImage = await fetchImage(logoUrl);
 
-    // Add the logo to the top right of the first page
-    doc.image(logoImage, doc.page.width - padding - 100, padding, {
-      fit: [100, 100],
+    // // Add the logo to the top right of the first page
+    // doc.image(logoImage, doc.page.width - padding - 100, padding, {
+    //   fit: [100, 100],
+    // });
+
+    const logoImage = path.join(__dirname, "..", "images", "logo.png"); // Adjust path as needed
+
+    // Set desired logo width
+    const logoWidth = 100; // Adjust the size to fit your design
+
+    // Calculate the position (keeping the image within bounds)
+    const logoXPosition = doc.page.width - logoWidth - 10; // 10px padding from the right
+    const yPosition = 10; // 10px padding from the top
+
+    // Add the logo (ensure it only appears once)
+    doc.image(logoImage, logoXPosition, yPosition, {
+      width: logoWidth, // Rescale the logo
     });
 
     const imagePath = path.join(__dirname, "..", "images", "first.jpg");

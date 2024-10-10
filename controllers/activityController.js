@@ -68,15 +68,13 @@ exports.searchActivityByDestination = async (req, res) => {
   try {
     // Use a case-insensitive regular expression to search for a substring match
     const activities = await Activity.find({
-      destination: { $regex: destination, $options: "i" }, // 'i' for case-insensitive, regex allows partial match
+      destination, // 'i' for case-insensitive, regex allows partial match
     });
 
     if (activities.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No activities found matching the destination pattern",
-        });
+      return res.status(404).json({
+        message: "No activities found matching the destination pattern",
+      });
     }
 
     res.status(200).json({
