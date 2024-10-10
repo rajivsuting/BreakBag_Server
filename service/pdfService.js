@@ -1,6 +1,8 @@
 const PDFDocument = require("pdfkit");
 const axios = require("axios");
 const path = require("path");
+
+const fs = require("fs");
 const {
   travelSummaryDemo,
   costData,
@@ -9,6 +11,7 @@ const {
   exclusionsData,
   otherInfoData,
 } = require("../data.js");
+const { LakeFormation } = require("aws-sdk");
 
 // Helper function to fetch image data from a URL
 async function fetchImage(url) {
@@ -32,7 +35,10 @@ async function generatePDF(res) {
 
     // Set the response headers
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "attachment; filename=dummy.pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=BreakBagItenerary.pdf"
+    );
 
     // Pipe the PDF into the response
     doc.pipe(res);
@@ -48,6 +54,27 @@ async function generatePDF(res) {
     const logoImage = await fetchImage(logoUrl);
 
     // Add the logo to the top right of the first page
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    const imagePath = path.join(__dirname, "..", "images", "first.jpg");
+
+    // Get the dimensions of the page
+    const pageWidth = doc.page.width;
+    const pageHeight = doc.page.height;
+
+    // Add the image to the page, covering the entire page
+    doc.image(imagePath, 0, 0, {
+      width: pageWidth,
+      height: pageHeight,
+      align: "center", // Optional, to center the image
+      valign: "center", // Optional, to center the image vertically
+    });
+
+    // ---------------------Second Page --------------------
+    doc.addPage();
+
     doc.image(logoImage, doc.page.width - padding - 100, padding, {
       fit: [100, 100],
     });
@@ -860,6 +887,118 @@ async function generatePDF(res) {
 
       inclusionY = doc.y + 15; // Add some space before the next item
     }
+
+    // -----------------------------Transfers---------------------------
+
+    // Add a new page for "TRANSFERS Process"
+    doc.addPage();
+
+    // Add the logo to the top right of the page (reuse the logoImage variable)
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    // Set the heading "TRANSFERS" and calculate its width
+    const TRANSFERSText = "TRANSFER";
+    doc.font("Times-Bold").fontSize(32);
+    const TRANSFERSTextWidth = doc.widthOfString(TRANSFERSText);
+
+    // Set the font for "Process" using Sacramento and calculate its width
+    const transfersProcessText = "Information";
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const transfersProcessTextWidth = doc.widthOfString(transfersProcessText);
+
+    // Calculate the total width of the "TRANSFERS Process" text
+    const totalTransfersHeadingWidth =
+      TRANSFERSTextWidth + transfersProcessTextWidth;
+
+    // Set X position to start from the left side of the page
+    const transfersHeadingXPosition = 0;
+
+    // Define Y position for the heading
+    const TRANSFERSYPosition = 70; // Adjust the Y position as needed
+
+    // Print "TRANSFERS" with a regular bold font
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "TRANSFERS"
+      .text(TRANSFERSText, transfersHeadingXPosition + 30, TRANSFERSYPosition, {
+        continued: true, // To print "Process" on the same line
+      });
+
+    // Print "Process" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "Process"
+      .text(
+        transfersProcessText,
+        transfersHeadingXPosition + TRANSFERSTextWidth - 140, // Adjust X position
+        TRANSFERSYPosition - 15 // Adjust Y position
+      );
+
+    // Draw a horizontal line below the heading
+    const transfersLineYPosition = TRANSFERSYPosition + 35; // Adjust the Y position below the text
+    doc
+      .moveTo(transfersHeadingXPosition - 40, transfersLineYPosition) // Start point of the line
+      .lineTo(
+        transfersHeadingXPosition + totalTransfersHeadingWidth + 40, // End point of the line
+        transfersLineYPosition
+      ) // Keep the Y position the same
+      .lineWidth(1) // Set the thickness of the line
+      .strokeColor("#000000") // Set the color of the line (black in this case)
+      .stroke(); // Draw the line
+
+    // Set the starting Y position for the bullet points
+    let bulletPointYPositionForTransfers = transfersLineYPosition + 35; // Adjust as needed
+
+    // Define maximum width for the text wrapping (you can adjust this based on your layout)
+    const maxWidthForTransfers = 500;
+
+    // Define the transfers process steps
+    const transfersProcessData = {
+      steps: [
+        "Select your desired transfer type (airport, hotel, etc.).",
+        "Provide the necessary details such as pickup and drop-off locations.",
+        "Choose the vehicle type (car, van, bus, etc.) and review the cost.",
+        "Confirm your transfer booking and payment details.",
+        "Receive a confirmation with your transfer details via email.",
+      ],
+    };
+
+    // Loop through each transfer process step and print it with a bullet point
+    transfersProcessData.steps.forEach((item) => {
+      // Set the bullet point character (•)
+      const bulletPoint = "• ";
+
+      // Set the font size and color for bullet points
+      doc
+        .font("Times-Roman") // Change font as needed
+        .fontSize(14) // Set font size to 14
+        .fillColor("#000000"); // Set the color for the text
+
+      // Print the bullet point first
+      doc.text(bulletPoint, 35, bulletPointYPositionForTransfers);
+
+      // Print the description next to the bullet point with automatic text wrapping
+      doc.text(item, 45, bulletPointYPositionForTransfers, {
+        width: maxWidthForTransfers, // Set max width for text wrapping
+        lineGap: 5, // Set line height between lines of text
+      });
+
+      // Calculate the height of the wrapped text
+      const itemHeight = doc.heightOfString(item, {
+        width: maxWidthForTransfers,
+      });
+
+      // Increment the Y position for the next bullet point, based on the height of the current item
+      bulletPointYPositionForTransfers += itemHeight + 19; // Add spacing between items
+    });
+
+    // ------------------------Exclusions----------------------------
     doc.addPage();
 
     doc.image(logoImage, doc.page.width - padding - 100, padding, {
@@ -1013,6 +1152,214 @@ async function generatePDF(res) {
       .lineWidth(1) // Set the thickness of the line
       .strokeColor("#000000") // Set the color of the line (black in this case)
       .stroke(); // Draw the line
+
+    // -------------------Other info ---------------------
+
+    // Set the starting Y position for the "OTHER Information" bullet points
+    let bulletPointYPositionForOtherInfo = informationLineYPosition + 35; // Adjust as needed
+
+    // Define maximum width for the text wrapping (you can adjust this based on your layout)
+    const maxWidthForOtherInfo = 500;
+
+    // Loop through each description and print it with a bullet point
+    otherInfoData.description.forEach((item) => {
+      // Set the bullet point character (•)
+      const bulletPoint = "• ";
+
+      // Set the font size and color for bullet points
+      doc
+        .font("Times-Roman") // Change font as needed
+        .fontSize(14) // Set font size to 14
+        .fillColor("#000000"); // Set the color for the text
+
+      // Print the bullet point first
+      doc.text(bulletPoint, 35, bulletPointYPositionForOtherInfo);
+
+      // Print the description next to the bullet point with automatic text wrapping
+      doc.text(item, 45, bulletPointYPositionForOtherInfo, {
+        width: maxWidthForOtherInfo, // Set max width for text wrapping
+        lineGap: 5, // Set line height between lines of text
+      });
+
+      // Calculate the height of the wrapped text
+      const itemHeight = doc.heightOfString(item, {
+        width: maxWidthForOtherInfo,
+      });
+
+      // Increment the Y position for the next bullet point, based on the height of the current item
+      bulletPointYPositionForOtherInfo += itemHeight + 19; // Add spacing between items
+    });
+
+    // ----------------------------Payment Process --------------------------------
+
+    // Add a new page for "PAYMENT Process"
+    doc.addPage();
+
+    // Add the logo to the top right of the page (reuse the logoImage variable)
+    doc.image(logoImage, doc.page.width - padding - 100, padding, {
+      fit: [100, 100],
+    });
+
+    // Set the heading "PAYMENT" and calculate its width
+    const PAYMENTText = "PAYMENT";
+    doc.font("Times-Bold").fontSize(32);
+    const PAYMENTTextWidth = doc.widthOfString(PAYMENTText);
+
+    // Set the font for "Process" using Sacramento and calculate its width
+    const processText = "Process";
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40);
+    const processTextWidth = doc.widthOfString(processText);
+
+    // Calculate the total width of the "PAYMENT Process" text
+    const totalPaymentHeadingWidth = PAYMENTTextWidth + processTextWidth;
+
+    // Set X position to start from the left side of the page
+    const paymentHeadingXPosition = 0;
+
+    // Define Y position for the heading
+    const PAYMENTYPosition = 70; // Adjust the Y position as needed
+
+    // Print "PAYMENT" with a regular bold font
+    doc
+      .font("Times-Bold")
+      .fontSize(32)
+      .fillColor("#053260") // Set the color for "PAYMENT"
+      .text(PAYMENTText, paymentHeadingXPosition + 30, PAYMENTYPosition, {
+        continued: true, // To print "Process" on the same line
+      });
+
+    // Print "Process" with Sacramento font
+    doc
+      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
+      .fontSize(40)
+      .fillColor("#ff9c00") // Set the color for "Process"
+      .text(
+        processText,
+        paymentHeadingXPosition + PAYMENTTextWidth - 125, // Adjust X position
+        PAYMENTYPosition - 15 // Adjust Y position
+      );
+
+    // Draw a horizontal line below the heading
+    const processLineYPosition = PAYMENTYPosition + 35; // Adjust the Y position below the text
+    doc
+      .moveTo(paymentHeadingXPosition - 40, processLineYPosition) // Start point of the line
+      .lineTo(
+        paymentHeadingXPosition + totalPaymentHeadingWidth + 40, // End point of the line
+        processLineYPosition
+      ) // Keep the Y position the same
+      .lineWidth(1) // Set the thickness of the line
+      .strokeColor("#000000") // Set the color of the line (black in this case)
+      .stroke(); // Draw the line
+
+    // Set the starting Y position for the Payment options section
+    let bulletPointYPositionForPayment = processLineYPosition + 35; // Adjust as needed
+
+    // Define the payment process description
+    const paymentDescription = "Following mode of Payment are available:";
+
+    // Increase line height by adjusting the Y position
+    const descriptionLineHeight = 25; // Adjust this value to increase spacing
+    doc
+      .font("Times-Roman")
+      .fontSize(14)
+      .fillColor("#000000")
+      .text(paymentDescription, 35, bulletPointYPositionForPayment);
+    doc.moveDown(descriptionLineHeight); // Move down by the increased line height
+
+    // Increment Y position for the next section
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    // Add the Bank Transfer section with details
+    doc
+      .font("Times-Bold")
+      .fontSize(18)
+      .fillColor("#053260") // Heading for "Bank Transfer"
+      .text("1. Bank Transfer:", 35, bulletPointYPositionForPayment);
+
+    // Increase spacing before account details
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    // Set color for subheadings
+    const subheadingColor = "#ff9c00";
+
+    // Bank Transfer Details
+    doc
+      .font("Times-Roman")
+      .fontSize(14)
+      .fillColor(subheadingColor) // Set color for subheadings
+      .text("Name:", 50, bulletPointYPositionForPayment, { continued: true });
+    doc.fillColor("#000000"); // Set color for content
+    doc.text(" BreakBag Holidays Private Limited", {
+      align: "left",
+      indent: 10,
+    });
+
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    doc
+      .fillColor(subheadingColor) // Set color for subheadings
+      .text("Account Number:", 50, bulletPointYPositionForPayment, {
+        continued: true,
+      });
+    doc.fillColor("#000000"); // Set color for content
+    doc.text(" 2413230364", { align: "left", indent: 10 });
+
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    doc
+      .fillColor(subheadingColor) // Set color for subheadings
+      .text("IFSC Code:", 50, bulletPointYPositionForPayment, {
+        continued: true,
+      });
+    doc.fillColor("#000000"); // Set color for content
+    doc.text(" KKBK0000326", { align: "left", indent: 10 });
+
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    doc
+      .fillColor(subheadingColor) // Set color for subheadings
+      .text("Account Type:", 50, bulletPointYPositionForPayment, {
+        continued: true,
+      });
+    doc.fillColor("#000000"); // Set color for content
+    doc.text(" Current", { align: "left", indent: 10 });
+
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    doc
+      .fillColor(subheadingColor) // Set color for subheadings
+      .text("Branch:", 50, bulletPointYPositionForPayment, { continued: true });
+    doc.fillColor("#000000"); // Set color for content
+    doc.text(" Kolkata, Salt Lake.", { align: "left", indent: 10 });
+
+    // Increment Y position for the next section
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    // Add the UPI Transfer section with details
+    doc
+      .font("Times-Bold")
+      .fontSize(18)
+      .fillColor("#053260") // Heading for "UPI Transfer"
+      .text("2. UPI Transfer:", 35, bulletPointYPositionForPayment);
+
+    // Increment Y position for the UPI details
+    bulletPointYPositionForPayment += descriptionLineHeight;
+
+    const upiTransferDetails = `breakbag@ybl`;
+
+    doc
+      .font("Times-Roman")
+      .fontSize(14)
+      .fillColor("#000000")
+      .text(upiTransferDetails, 50, bulletPointYPositionForPayment, {
+        lineGap: 5,
+      });
+
+    // Calculate the height of the UPI transfer details and update Y position
+    bulletPointYPositionForPayment +=
+      doc.heightOfString(upiTransferDetails) + 20;
 
     doc.end();
   } catch (error) {

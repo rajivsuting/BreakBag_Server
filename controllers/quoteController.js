@@ -13,28 +13,31 @@ exports.createQuote = async (req, res) => {
     if (!destination) {
       return res.status(400).json({ message: "Destination is required." });
     }
-    if (!startDate || startDate.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "At least one start date is required." });
+    if (!startDate) {
+      return res.status(400).json({ message: "Start date is required." });
     }
-    if (!endDate || endDate.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "At least one end date is required." });
+    if (!endDate) {
+      return res.status(400).json({ message: "End date is required." });
     }
 
-    // Calculate duration in days (difference between startDate and endDate)
-    const start = new Date(startDate[0]);
-    const end = new Date(endDate[0]);
+    // Parse the start and end dates correctly
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-    if (end < start) {
-      return res
-        .status(400)
-        .json({ message: "End date must be after start date." });
+    // Ensure valid date objects
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return res.status(400).json({ message: "Invalid date format." });
     }
 
-    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1; // Calculate duration in days (including both start and end date)
+    // Ensure the end date is after or the same as the start date
+    if (end <= start) {
+      return res
+        .status(400)
+        .json({ message: "End date must be after the start date." });
+    }
+
+    // Calculate duration in days (excluding the end date)
+    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)); // Duration in days (excluding end date)
 
     // Create a new quote record in the database
     const newQuote = await Quote.create({
@@ -44,7 +47,6 @@ exports.createQuote = async (req, res) => {
       startDate,
       endDate,
       duration, // Calculated duration in days
-      // Set the status from the request body or use the default value
     });
 
     // Send a success response
