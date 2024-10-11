@@ -67,7 +67,10 @@ exports.getAllQuotes = async (req, res) => {
     // Fetch all quotes and populate the traveller and destination details
     const quotes = await Quote.find()
       .populate("travellers", "name email") // Populate traveller's name and email
-      .populate("destination", "title"); // Populate destination title
+      .populate("destination", "title").populate({
+        path: "comments.author", // Populate author field within comments
+        select: "name email", // Only retrieve name and email from the User model
+      });
 
     if (!quotes || quotes.length === 0) {
       return res.status(404).json({ message: "No quotes found." });
