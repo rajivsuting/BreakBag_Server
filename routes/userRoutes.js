@@ -18,7 +18,7 @@ router.delete("/delete/:id", userController.deleteUser);
 router.get(
   "/team-lead/:teamLeadId/agents",
   restrictTo("Team Lead"),
-  getAgentsUnderTeamLead
+  userController.getAgentsUnderTeamLead
 );
 
 router.post(

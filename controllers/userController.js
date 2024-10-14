@@ -205,11 +205,9 @@ exports.assignAgentsToTeamLead = async (req, res) => {
     );
 
     if (result.nModified === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No agents were assigned. Please verify the agent IDs.",
-        });
+      return res.status(404).json({
+        message: "No agents were assigned. Please verify the agent IDs.",
+      });
     }
 
     return res.status(200).json({
