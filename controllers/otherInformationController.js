@@ -2,7 +2,7 @@ const OtherInformation = require("../models/otherInformation");
 
 exports.createOtherInformation = async (req, res) => {
   try {
-    const { description } = req.body; // Extract description from the request body
+    const { description, title } = req.body; // Extract description from the request body
 
     if (!description) {
       return res.status(400).json({ message: "No items provided." });
@@ -11,6 +11,7 @@ exports.createOtherInformation = async (req, res) => {
     // Create a new OtherInformation record in the database
     const newOtherInformation = await OtherInformation.create({
       description,
+      title,
     });
 
     // Send a success response

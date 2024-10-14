@@ -2,7 +2,7 @@ const Exclusion = require("../models/exclusion");
 
 exports.createExclusion = async (req, res) => {
   try {
-    const { description } = req.body; // Extract description from the request body
+    const { description, title } = req.body; // Extract description from the request body
 
     if (!description) {
       return res.status(400).json({ message: "No items provided." });
@@ -11,6 +11,7 @@ exports.createExclusion = async (req, res) => {
     // Create a new exclusion record in the database
     const newExclusion = await Exclusion.create({
       description,
+      title,
     });
 
     // Send a success response

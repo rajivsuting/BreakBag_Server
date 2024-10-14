@@ -2,7 +2,7 @@ const Transfer = require("../models/transfer");
 
 exports.createTransfer = async (req, res) => {
   try {
-    const { description } = req.body; // Extract description from the request body
+    const { description, title } = req.body; // Extract description from the request body
 
     if (!description) {
       return res.status(400).json({ message: "No items provided." });
@@ -11,6 +11,7 @@ exports.createTransfer = async (req, res) => {
     // Create a new transfer record in the database
     const newTransfer = await Transfer.create({
       description,
+      title,
     });
 
     // Send a success response
