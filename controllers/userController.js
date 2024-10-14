@@ -137,3 +137,90 @@ exports.deleteUser = async (req, res) => {
     });
   }
 };
+
+// Get Agents under a specific Team Lead
+exports.getAgentsUnderTeamLead = async (req, res) => {
+  try {
+    const { teamLeadId } = req.user; // Get Team Lead ID from request parameters
+
+    // Check if Team Lead ID is provided
+    if (!teamLeadId) {
+      return res.status(400).json({ message: "Team Lead ID is required." });
+    }
+
+    // Find all agents that have the given Team Lead
+    const agents = await User.find({
+      role: "Agent",
+      teamLead: teamLeadId,
+    });
+
+    // Check if there are any agents under this Team Lead
+    if (!agents || agents.length === 0) {
+      return res.status(404).json({
+        message: "No agents found under this Team Lead.",
+      });
+    }
+
+    // Return the list of agents
+    return res.status(200).json({
+      message: "Agents retrieved successfully",
+      data: agents,
+    });
+  } catch (err) {
+    console.error("Error retrieving agents:", err);
+    return res.status(500).json({
+      message: "Error retrieving agents",
+      error: err.message,
+    });
+  }
+};
+
+exports.assignAgentsToTeamLead = async (req, res) => {
+  try {
+    const { teamLeadId } = req.params; // Get Team Lead ID from request parameters
+    const { agentIds } = req.body; // Get array of Agent IDs from the request body
+
+    // Validate inputs
+    if (!teamLeadId) {
+      return res.status(400).json({ message: "Team Lead ID is required." });
+    }
+    if (!agentIds || !Array.isArray(agentIds) || agentIds.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "A list of Agent IDs is required." });
+    }
+
+    // Check if the team lead exists
+    const teamLead = await User.findById(teamLeadId);
+    if (!teamLead || teamLead.role !== "Team Lead") {
+      return res
+        .status(404)
+        .json({ message: "Team Lead not found or invalid role." });
+    }
+
+    // Update the teamLead field for each agent in the list of agentIds
+    const result = await User.updateMany(
+      { _id: { $in: agentIds }, role: "Agent" }, // Only update Agents
+      { $set: { teamLead: teamLeadId } } // Assign them to the Team Lead
+    );
+
+    if (result.nModified === 0) {
+      return res
+        .status(404)
+        .json({
+          message: "No agents were assigned. Please verify the agent IDs.",
+        });
+    }
+
+    return res.status(200).json({
+      message: "Agents assigned to Team Lead successfully",
+      modifiedCount: result.nModified, // Number of agents modified
+    });
+  } catch (err) {
+    console.error("Error assigning agents:", err);
+    return res.status(500).json({
+      message: "Error assigning agents",
+      error: err.message,
+    });
+  }
+};

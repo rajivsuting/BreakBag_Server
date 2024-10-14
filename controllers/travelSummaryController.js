@@ -3,7 +3,7 @@ const logger = require("../config/logger");
 
 // Create a new Travel Summary
 exports.createTravelSummary = async (req, res) => {
-  const { title, description, destination } = req.body;
+  const { title, description } = req.body;
 
   // Validate required fields
   if (!title || !description) {
@@ -16,7 +16,6 @@ exports.createTravelSummary = async (req, res) => {
     const travelSummary = new TravelSummary({
       title,
       description,
-      destination,
     });
 
     await travelSummary.save();
