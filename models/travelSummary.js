@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const travelSummary = new Schema({
+const travelSummarySchema = new Schema({
   title: {
     type: String,
     required: true,
@@ -13,4 +13,7 @@ const travelSummary = new Schema({
   },
 });
 
-module.exports = mongoose.model("TravelSummary", travelSummary);
+// Create a compound text index on both title and description
+travelSummarySchema.index({ title: "text", description: "text" });
+
+module.exports = mongoose.model("TravelSummary", travelSummarySchema);

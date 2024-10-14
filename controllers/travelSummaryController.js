@@ -53,31 +53,36 @@ exports.getAllTravelSummary = async (req, res) => {
   }
 };
 
-exports.searchTravelSummaryByDestination = async (req, res) => {
-  const { destination } = req.params;
-
-  // Validate required field
-  if (!destination) {
-    return res.status(400).json({ message: "Destination is required" });
-  }
-
+exports.searchTravelSummariesByKeyword = async (req, res) => {
   try {
-    const travelSummaries = await TravelSummary.find({ destination });
+    const { keyword } = req.query; // Get keyword from query parameters
 
-    if (travelSummaries.length === 0) {
+    if (!keyword) {
+      return res
+        .status(400)
+        .json({ message: "Keyword is required for search." });
+    }
+
+    // Search for travel summaries with a keyword in title or description
+    const results = await TravelSummary.find({
+      $text: { $search: keyword },
+    });
+
+    if (!results || results.length === 0) {
       return res.status(404).json({
-        message: "No travel summaries found for the specified destination",
+        message: "No travel summaries found matching the keyword.",
       });
     }
 
-    res.status(200).json({
-      message: "Travel Summaries retrieved successfully",
-      travelSummaries,
+    return res.status(200).json({
+      message: "Travel summaries retrieved successfully",
+      data: results,
     });
-  } catch (error) {
-    logger.error(`Error searching travel summaries: ${error.message}`);
-    res
-      .status(500)
-      .json({ message: "Error searching travel summaries", error });
+  } catch (err) {
+    console.error("Error retrieving travel summaries:", err);
+    return res.status(500).json({
+      message: "Error retrieving travel summaries",
+      error: err.message,
+    });
   }
 };
