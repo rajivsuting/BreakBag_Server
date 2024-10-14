@@ -2,16 +2,15 @@ const OtherInformation = require("../models/otherInformation");
 
 exports.createOtherInformation = async (req, res) => {
   try {
-    const { description, destination } = req.body; // Extract description from the request body
+    const { description } = req.body; // Extract description from the request body
 
-    if (!description || description.length === 0) {
+    if (!description) {
       return res.status(400).json({ message: "No items provided." });
     }
 
     // Create a new OtherInformation record in the database
     const newOtherInformation = await OtherInformation.create({
       description,
-      destination,
     });
 
     // Send a success response
@@ -30,10 +29,7 @@ exports.createOtherInformation = async (req, res) => {
 
 exports.getAllOtherInformation = async (req, res) => {
   try {
-    const otherInformationList = await OtherInformation.find().populate(
-      "destination",
-      "title"
-    ); // Fetch all records from the database
+    const otherInformationList = await OtherInformation.find(); // Fetch all records from the database
 
     if (otherInformationList.length === 0) {
       return res.status(404).json({ message: "No other information found." });
@@ -53,30 +49,34 @@ exports.getAllOtherInformation = async (req, res) => {
   }
 };
 
-exports.getOtherinformationByDestination = async (req, res) => {
+exports.searchOtherInformationByKeyword = async (req, res) => {
   try {
-    const { destination } = req.params; // Get destination from request parameters
+    const { keywords } = req.query; // Get search keywords from query parameters
 
-    if (!destination) {
-      return res.status(400).json({ message: "Destination is required." });
+    // Validate keywords
+    if (!keywords || keywords.trim() === "") {
+      return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    const otherInformation = await OtherInformation.findOne({ destination });
+    // Perform a text search on the 'description' field using the provided keywords
+    const otherInformation = await OtherInformation.find({
+      $text: { $search: keywords },
+    });
 
-    if (otherInformation.length === 0) {
+    if (!otherInformation || otherInformation.length === 0) {
       return res
         .status(404)
-        .json({ message: "No otherInformation found for this destination." });
+        .json({ message: "No information found matching the keywords." });
     }
 
     return res.status(200).json({
-      message: "Otherinformation retrieved successfully",
+      message: "Information retrieved successfully",
       data: otherInformation,
     });
   } catch (err) {
-    console.error("Error retrieving Otherinformation:", err);
+    console.error("Error retrieving information:", err);
     return res.status(500).json({
-      message: "Error retrieving Otherinformation",
+      message: "Error retrieving information",
       error: err.message,
     });
   }

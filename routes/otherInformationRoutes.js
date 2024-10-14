@@ -19,8 +19,8 @@ router.get(
 );
 
 router.get(
-  "/destination/:destination",
-  otherInformationController.getOtherinformationByDestination
+  "/search",
+  otherInformationController.searchOtherInformationByKeyword
 );
 
 module.exports = router;

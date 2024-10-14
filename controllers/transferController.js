@@ -2,16 +2,15 @@ const Transfer = require("../models/transfer");
 
 exports.createTransfer = async (req, res) => {
   try {
-    const { description, destination } = req.body; // Extract description from the request body
+    const { description } = req.body; // Extract description from the request body
 
-    if (!description || description.length === 0) {
+    if (!description) {
       return res.status(400).json({ message: "No items provided." });
     }
 
     // Create a new transfer record in the database
     const newTransfer = await Transfer.create({
       description,
-      destination,
     });
 
     // Send a success response
@@ -29,7 +28,7 @@ exports.createTransfer = async (req, res) => {
 
 exports.getAllTransfers = async (req, res) => {
   try {
-    const transfers = await Transfer.find().populate("destination", "title"); // Fetch all transfers from the database
+    const transfers = await Transfer.find(); // Fetch all transfers from the database
 
     if (transfers.length === 0) {
       return res.status(404).json({ message: "No transfers found." });
@@ -48,30 +47,34 @@ exports.getAllTransfers = async (req, res) => {
   }
 };
 
-exports.getTransferByDestination = async (req, res) => {
+exports.searchTransfersByKeyword = async (req, res) => {
   try {
-    const { destination } = req.params; // Get destination from request parameters
+    const { keywords } = req.query; // Get search keywords from query parameters
 
-    if (!destination) {
-      return res.status(400).json({ message: "Destination is required." });
+    // Validate keywords
+    if (!keywords || keywords.trim() === "") {
+      return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    const transfer = await Transfer.findOne({ destination });
+    // Perform text search on the 'description' field using the provided keywords
+    const transfers = await Transfer.find({
+      $text: { $search: keywords },
+    });
 
-    if (transfer.length === 0) {
+    if (!transfers || transfers.length === 0) {
       return res
         .status(404)
-        .json({ message: "No transfer found for this destination." });
+        .json({ message: "No transfers found matching the keywords." });
     }
 
     return res.status(200).json({
-      message: "Transfer retrieved successfully",
-      data: transfer,
+      message: "Transfers retrieved successfully",
+      data: transfers,
     });
   } catch (err) {
-    console.error("Error retrieving Transfer:", err);
+    console.error("Error retrieving transfers:", err);
     return res.status(500).json({
-      message: "Error retrieving Transfer",
+      message: "Error retrieving transfers",
       error: err.message,
     });
   }

@@ -2,16 +2,15 @@ const Exclusion = require("../models/exclusion");
 
 exports.createExclusion = async (req, res) => {
   try {
-    const { description, destination } = req.body; // Extract description from the request body
+    const { description } = req.body; // Extract description from the request body
 
-    if (!description || description.length === 0) {
+    if (!description) {
       return res.status(400).json({ message: "No items provided." });
     }
 
     // Create a new exclusion record in the database
     const newExclusion = await Exclusion.create({
       description,
-      destination,
     });
 
     // Send a success response
@@ -29,7 +28,7 @@ exports.createExclusion = async (req, res) => {
 
 exports.getAllExclusions = async (req, res) => {
   try {
-    const exclusions = await Exclusion.find().populate("destination", "title"); // Fetch all exclusions from the database
+    const exclusions = await Exclusion.find();
 
     if (exclusions.length === 0) {
       return res.status(404).json({ message: "No exclusions found." });
@@ -48,20 +47,24 @@ exports.getAllExclusions = async (req, res) => {
   }
 };
 
-exports.getExclusionByDestination = async (req, res) => {
+exports.searchExclusionsByKeyword = async (req, res) => {
   try {
-    const { destination } = req.params; // Get destination from request parameters
+    const { keywords } = req.query; // Get search keywords from query parameters
 
-    if (!destination) {
-      return res.status(400).json({ message: "Destination is required." });
+    // Validate keywords
+    if (!keywords || keywords.trim() === "") {
+      return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    const exclusions = await Exclusion.findOne({ destination });
+    // Perform text search on 'title' and 'description' using the provided keywords
+    const exclusions = await Exclusion.find({
+      $text: { $search: keywords },
+    });
 
-    if (exclusions.length === 0) {
+    if (!exclusions || exclusions.length === 0) {
       return res
         .status(404)
-        .json({ message: "No exclusions found for this destination." });
+        .json({ message: "No exclusions found matching the keywords." });
     }
 
     return res.status(200).json({

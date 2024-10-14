@@ -1,17 +1,19 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-const userSchema = new mongoose.Schema({
+const userSchema = new Schema({
   name: { type: String, required: true }, // Adding name for user identification
   email: { type: String, unique: true, required: true },
   phone: { type: String, required: true }, // Add phone for OTP verification
   role: {
     type: String,
-    enum: ["Admin", "Agent"],
+    enum: ["Admin", "Agent", " Team Lead"],
     required: true,
   },
-  isTeamlead: {
-    type: Boolean,
-    default: false, // Field to indicate if the Agent is also a Teamlead
+  teamLead: {
+    // Will be populated if the user is an Agent and assigned a Team Lead
+    type: Schema.Types.ObjectId,
+    ref: "User",
   },
   otp: String,
   otpExpiry: Date, // Field for storing OTP expiration time

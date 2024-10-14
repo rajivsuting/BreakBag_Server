@@ -18,9 +18,6 @@ router.get(
   transferController.getAllTransfers
 );
 
-router.get(
-  "/destination/:destination",
-  transferController.getTransferByDestination
-);
+router.get("/search", transferController.searchTransfersByKeyword);
 
 module.exports = router;

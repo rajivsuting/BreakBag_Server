@@ -1,8 +1,7 @@
 const User = require("../models/User"); // Assuming the User model is in the models folder
 
-// Create a new agent
-exports.createAgent = async (req, res) => {
-  const { name, email, phone, isTeamlead } = req.body;
+exports.createUser = async (req, res) => {
+  const { name, email, phone, role, teamLeadId } = req.body;
 
   try {
     // Check if email already exists
@@ -11,24 +10,31 @@ exports.createAgent = async (req, res) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const agent = new User({
+    // Check if role is valid
+    if (!["Admin", "Agent", "Team Lead"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role specified" });
+    }
+
+    // If the user is an Agent, assign the teamLead if provided
+    const newUser = new User({
       name,
       email,
       phone,
-      role: "Agent",
-      isTeamlead: isTeamlead || false, // Default to false if not provided
+      role,
+      teamLead: role === "Agent" && teamLeadId ? teamLeadId : undefined, // Only assign teamLead if the user is an Agent
     });
 
-    await agent.save();
+    // Save the user
+    await newUser.save();
 
     return res.status(201).json({
-      message: "Agent created successfully",
-      data: agent,
+      message: `${role} created successfully`,
+      data: newUser,
     });
   } catch (err) {
-    console.error("Error creating agent:", err);
+    console.error("Error creating user:", err);
     return res.status(500).json({
-      message: "Error creating agent",
+      message: "Error creating user",
       error: err.message,
     });
   }
@@ -51,6 +57,27 @@ exports.getAllAgents = async (req, res) => {
     console.error("Error retrieving agents:", err);
     return res.status(500).json({
       message: "Error retrieving agents",
+      error: err.message,
+    });
+  }
+};
+
+exports.getAllTeamLeads = async (req, res) => {
+  try {
+    const agents = await User.find({ role: "Team Lead" });
+
+    if (agents.length === 0) {
+      return res.status(404).json({ message: "No Team Leads found" });
+    }
+
+    return res.status(200).json({
+      message: "Team Leads retrieved successfully",
+      data: agents,
+    });
+  } catch (err) {
+    console.error("Error retrieving Team Leads:", err);
+    return res.status(500).json({
+      message: "Error retrieving Team Leads",
       error: err.message,
     });
   }
@@ -90,25 +117,22 @@ exports.editAgent = async (req, res) => {
 };
 
 // Delete an agent
-exports.deleteAgent = async (req, res) => {
+exports.deleteUser = async (req, res) => {
   const { id } = req.params;
 
   try {
     const agent = await User.findById(id);
-    if (!agent || agent.role !== "Agent") {
-      return res.status(404).json({ message: "Agent not found" });
-    }
 
     await agent.remove();
 
     return res.status(200).json({
-      message: "Agent deleted successfully",
+      message: "User deleted successfully",
       data: agent,
     });
   } catch (err) {
-    console.error("Error deleting agent:", err);
+    console.error("Error deleting user:", err);
     return res.status(500).json({
-      message: "Error deleting agent",
+      message: "Error deleting user",
       error: err.message,
     });
   }

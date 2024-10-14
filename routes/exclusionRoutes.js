@@ -18,9 +18,6 @@ router.get(
   exclusionController.getAllExclusions
 );
 
-router.get(
-  "/destination/:destination",
-  exclusionController.getExclusionByDestination
-);
+router.get("/search", exclusionController.searchExclusionsByKeyword);
 
 module.exports = router;

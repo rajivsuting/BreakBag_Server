@@ -12,7 +12,7 @@ const transferRoutes = require("./routes/transferRoutes");
 const otherInformationRoutes = require("./routes/otherInformationRoutes");
 const quoteRoutes = require("./routes/quoteRoutes");
 const pdfRoutes = require("./routes/pdfRoutes");
-const agentRoutes = require("./routes/agentRoutes")
+const userRoutes = require("./routes/userRoutes");
 const logger = require("./config/logger");
 const connectDB = require("./db/connectDB");
 
@@ -33,7 +33,7 @@ app.use("/api/exclusion", exclusionRoutes);
 app.use("/api/transfer", transferRoutes);
 app.use("/api/other-information", otherInformationRoutes);
 app.use("/api/quote", quoteRoutes);
-app.use("/api/agent", agentRoutes);
+app.use("/api/agent", userRoutes);
 app.use("/api/pdf", pdfRoutes);
 
 // Start server

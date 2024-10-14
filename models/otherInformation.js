@@ -2,14 +2,17 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const otherInformationSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   description: {
-    type: [String],
+    type: String,
     required: true,
   },
-  destination: {
-    type: Schema.Types.ObjectId,
-    ref: "Destination",
-  },
 });
+
+otherInformationSchema.index({ title: "text", description: "text" });
 
 module.exports = mongoose.model("OtherInformation", otherInformationSchema);
