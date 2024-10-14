@@ -57,9 +57,15 @@ exports.searchExclusionsByKeyword = async (req, res) => {
       return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    // Perform text search on 'title' and 'description' using the provided keywords
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keywords, "i");
+
+    // Perform search on 'title' and 'description' using regex for substring matching
     const exclusions = await Exclusion.find({
-      $text: { $search: keywords },
+      $or: [
+        { title: { $regex: regex } }, // Search in title
+        { description: { $regex: regex } }, // Search in description
+      ],
     });
 
     if (!exclusions || exclusions.length === 0) {

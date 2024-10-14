@@ -13,7 +13,7 @@ const travelSummarySchema = new Schema({
   },
 });
 
-// Create a compound text index on both title and description
+// Creating a text index on both title and description
 travelSummarySchema.index({ title: "text", description: "text" });
 
 module.exports = mongoose.model("TravelSummary", travelSummarySchema);

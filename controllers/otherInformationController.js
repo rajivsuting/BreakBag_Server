@@ -59,9 +59,12 @@ exports.searchOtherInformationByKeyword = async (req, res) => {
       return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    // Perform a text search on the 'description' field using the provided keywords
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keywords, "i");
+
+    // Perform search on 'description' using regex for substring matching
     const otherInformation = await OtherInformation.find({
-      $text: { $search: keywords },
+      description: { $regex: regex },
     });
 
     if (!otherInformation || otherInformation.length === 0) {

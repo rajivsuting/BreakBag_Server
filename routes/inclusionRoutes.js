@@ -20,8 +20,5 @@ router.get(
   inclusionController.getAllInclusions
 );
 
-router.get(
-  "/destination/:destination",
-  inclusionController.getInclusionByDestination
-);
+router.get("/search", inclusionController.searchInclusionsByKeyword);
 module.exports = router;

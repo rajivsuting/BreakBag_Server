@@ -62,11 +62,15 @@ exports.searchTravelSummariesByKeyword = async (req, res) => {
         .json({ message: "Keyword is required for search." });
     }
 
-    // Search for travel summaries with a keyword in title or description
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keyword, "i");
+
+    // Search for travel summaries where title or description matches the regex
     const results = await TravelSummary.find({
-      $text: { $search: keyword },
+      $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
     });
 
+    // Check if results were found
     if (!results || results.length === 0) {
       return res.status(404).json({
         message: "No travel summaries found matching the keyword.",

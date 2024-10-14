@@ -57,9 +57,12 @@ exports.searchTransfersByKeyword = async (req, res) => {
       return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    // Perform text search on the 'description' field using the provided keywords
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keywords, "i");
+
+    // Perform search on 'description' using regex for substring matching
     const transfers = await Transfer.find({
-      $text: { $search: keywords },
+      description: { $regex: regex },
     });
 
     if (!transfers || transfers.length === 0) {

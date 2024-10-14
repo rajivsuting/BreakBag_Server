@@ -60,20 +60,30 @@ exports.getAllInclusions = async (req, res) => {
   }
 };
 
-exports.getInclusionByDestination = async (req, res) => {
+exports.searchInclusionsByKeyword = async (req, res) => {
   try {
-    const { destination } = req.params; // Get destination from request parameters
+    const { keywords } = req.query; // Get search keywords from query parameters
 
-    if (!destination) {
-      return res.status(400).json({ message: "Destination is required." });
+    // Validate keywords
+    if (!keywords || keywords.trim() === "") {
+      return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    const inclusions = await Inclusion.findOne({ destination });
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keywords, "i");
 
-    if (inclusions.length === 0) {
+    // Perform search on 'title' and 'description' using regex for substring matching
+    const inclusions = await Inclusion.find({
+      $or: [
+        { title: { $regex: regex } }, // Search within the title field
+        { description: { $regex: regex } }, // Search within the description field
+      ],
+    });
+
+    if (!inclusions || inclusions.length === 0) {
       return res
         .status(404)
-        .json({ message: "No inclusions found for this destination." });
+        .json({ message: "No inclusions found matching the keywords." });
     }
 
     return res.status(200).json({
