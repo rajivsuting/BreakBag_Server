@@ -2,7 +2,7 @@ const Inclusion = require("../models/inclusion");
 
 exports.createInclusion = async (req, res) => {
   try {
-    const { itemList, destination } = req.body;
+    const { itemList } = req.body;
     const files = req.files;
 
     if (!files || files.length === 0) {
@@ -21,7 +21,6 @@ exports.createInclusion = async (req, res) => {
     const newInclusion = await Inclusion.create({
       itemList: parsedItemList,
       images: imageUrls,
-      destination,
     });
 
     return res.status(201).json({
@@ -39,7 +38,7 @@ exports.createInclusion = async (req, res) => {
 
 exports.getAllInclusions = async (req, res) => {
   try {
-    const inclusions = await Inclusion.find().populate("destination", "title");
+    const inclusions = await Inclusion.find();
 
     if (!inclusions || inclusions.length === 0) {
       return res.status(404).json({

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const item = new Schema({
+const inclusionSchema = new Schema({
   title: {
     required: true,
     type: String,
@@ -9,24 +9,11 @@ const item = new Schema({
   },
 
   description: {
-    type: [String],
+    type: String,
     required: true,
   },
 });
 
-const inclusionSchema = new Schema({
-  itemList: {
-    type: [item],
-    required: true,
-  },
-  images: {
-    type: [String],
-    required: true,
-  },
-  destination: {
-    type: Schema.Types.ObjectId,
-    ref: "Destination",
-  },
-});
+inclusionSchema.index({ title: "text", description: "text" });
 
 module.exports = mongoose.model("Inclusion", inclusionSchema);
