@@ -34,7 +34,6 @@ exports.getAllTravelSummary = async (req, res) => {
 
   try {
     const travelSummaries = await TravelSummary.find()
-      .populate("destination", "title")
       .lean() // Performance optimization
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
