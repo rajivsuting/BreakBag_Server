@@ -44,12 +44,8 @@ exports.createUser = async (req, res) => {
 exports.getAllAgentsOrTeamleads = async (req, res) => {
   try {
     const { role } = req.query;
-    let agents;
-    if (role === "All") {
-      agents = await User.find();
-    } else {
-      agents = await User.find({ role: role });
-    }
+    const agents = await User.find({ role: role });
+
     if (agents.length === 0) {
       return res.status(404).json({ message: `No ${role} found` });
     }
