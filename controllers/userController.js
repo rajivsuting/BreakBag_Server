@@ -179,7 +179,7 @@ exports.getAgentsUnderTeamLead = async (req, res) => {
 exports.assignAgentsToTeamLead = async (req, res) => {
   try {
     const { teamLeadId } = req.params; // Get Team Lead ID from request parameters
-    const { agentIds } = req.body; // Get array of Agent IDs from the request body
+    const agentIds = req.body; // Get array of Agent IDs from the request body
 
     // Validate inputs
     if (!teamLeadId) {

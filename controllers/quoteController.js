@@ -1,4 +1,5 @@
 const Quote = require("../models/quote");
+const generatePDF = require("../service/pdfService");
 
 exports.createQuote = async (req, res) => {
   try {
@@ -168,5 +169,72 @@ exports.createCommentOnQuote = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error creating comment on quote", error: err.message });
+  }
+};
+
+exports.createIntenerary = async (req, res) => {
+  const {
+    travelSummaryPerDay,
+    priceDetails,
+    selectedHotel,
+    selectedExclusions,
+    selectedOtherInformation,
+    selectedTransfers,
+    selectedInclusions,
+  } = req.body;
+  try {
+    const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
+      title: item.summaryDetails.title,
+      description: item.summaryDetails.description,
+    }));
+
+    const hotelData = selectedHotel.map((hotel) => ({
+      name: hotel.name,
+      checkInDate: hotel.checkInDate,
+      checkOutDate: hotel.checkOutDate,
+      location: hotel.vicinity, // using 'vicinity' as 'location'
+      mealPlan: hotel.mealPlan,
+      numberOfGuest: parseInt(hotel.numberOfGuest), // converting to number
+      roomType: hotel.roomType,
+    }));
+
+    const otherInfoData = selectedOtherInformation.map(
+      (info) => info.description
+    );
+
+    const exclusionsData = selectedExclusions.map(
+      (exclusion) => exclusion.description
+    );
+
+    const transfersProcessData = selectedTransfers.map(
+      (transfer) => transfer.description
+    );
+
+    const inclusionData = {
+      itemList: selectedInclusions.map((inclusion) => {
+        let descriptionArray = [inclusion.description]; // Convert description into array
+
+        return {
+          title: inclusion.title, // Map title as is
+          description: descriptionArray, // Add description inside an array
+        };
+      }),
+    };
+
+    await generatePDF(
+      res,
+      travelSummaryDemo,
+      priceDetails,
+      inclusionData,
+      exclusionsData,
+      otherInfoData,
+      hotelData
+    );
+  } catch (error) {
+    console.error("Error creating intenerary:", error);
+    return res.status(500).json({
+      message: "Error creating intenerary",
+      error: error.message,
+    });
   }
 };

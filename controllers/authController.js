@@ -84,8 +84,6 @@ exports.login = async (req, res) => {
   }
 };
 
-// Verify OTP and login
-// Verify OTP and login
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -104,11 +102,11 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // Generate JWT token
+    // Generate JWT token with 24 hours expiration
     const token = jwt.sign(
       { userId: user._id, role: user.role, isTeamlead: user.isTeamlead },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: "24h" } // Token expires in 24 hours
     );
 
     // Clear OTP-related fields after successful login
@@ -120,7 +118,7 @@ exports.verifyOtp = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true, // Prevents client-side JS from accessing the cookie
       secure: process.env.NODE_ENV === "production", // Ensures the cookie is only sent over HTTPS in production
-      maxAge: 24 * 60 * 60 * 1000, // Expires in 1 day
+      maxAge: 24 * 60 * 60 * 1000, // Cookie expires in 24 hours
       sameSite: "strict", // Protects against CSRF attacks
     });
 

@@ -61,13 +61,13 @@ exports.getTravellers = async (req, res) => {
       total = await Traveller.countDocuments();
     } else {
       // Non-Admin: Can only view travellers assigned to them
-      travellers = await Traveller.find({ agentAssigned: loggedInUser._id })
+      travellers = await Traveller.find({ agentAssigned: loggedInUser.userId })
         .lean()
         .skip((page - 1) * limit)
         .limit(parseInt(limit));
 
       total = await Traveller.countDocuments({
-        agentAssigned: loggedInUser._id,
+        agentAssigned: loggedInUser.userId,
       });
     }
 

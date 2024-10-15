@@ -18,4 +18,6 @@ router.post(
   quoteController.createCommentOnQuote
 );
 
+router.post("/itenerary/generate", quoteController.createIntenerary);
+
 module.exports = router;

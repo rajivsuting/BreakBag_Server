@@ -4,13 +4,13 @@ const path = require("path");
 
 const fs = require("fs");
 const {
-  travelSummaryDemo,
-  costData,
+  // travelSummaryDemo,
+  // costData,
   detailedIteneraryData,
-  inclusionData,
-  exclusionsData,
-  otherInfoData,
-  hotelData,
+  // inclusionData,
+  // exclusionsData,
+  // otherInfoData,
+  // hotelData,
 } = require("../data.js");
 const { LakeFormation } = require("aws-sdk");
 
@@ -29,7 +29,15 @@ async function fetchImage(url) {
 }
 
 // Function to generate the PDF
-async function generatePDF(res) {
+async function generatePDF(
+  res,
+  travelSummaryDemo,
+  costData,
+  inclusionData,
+  exclusionsData,
+  otherInfoData,
+  hotelData
+) {
   try {
     // Create a new PDF document with A4 size
     const doc = new PDFDocument({ size: "A4" });
@@ -1052,18 +1060,9 @@ async function generatePDF(res) {
     const maxWidthForTransfers = 500;
 
     // Define the transfers process steps
-    const transfersProcessData = {
-      steps: [
-        "Select your desired transfer type (airport, hotel, etc.).",
-        "Provide the necessary details such as pickup and drop-off locations.",
-        "Choose the vehicle type (car, van, bus, etc.) and review the cost.",
-        "Confirm your transfer booking and payment details.",
-        "Receive a confirmation with your transfer details via email.",
-      ],
-    };
 
     // Loop through each transfer process step and print it with a bullet point
-    transfersProcessData.steps.forEach((item) => {
+    transfersProcessData.forEach((item) => {
       // Set the bullet point character (•)
       const bulletPoint = "• ";
 
@@ -1158,7 +1157,7 @@ async function generatePDF(res) {
     const maxWidth = 500;
 
     // Loop through each description and print it with a bullet point
-    exclusionsData.description.forEach((item) => {
+    exclusionsData.forEach((item) => {
       // Set the bullet point character (•)
       const bulletPoint = "• ";
 
@@ -1255,7 +1254,7 @@ async function generatePDF(res) {
     const maxWidthForOtherInfo = 500;
 
     // Loop through each description and print it with a bullet point
-    otherInfoData.description.forEach((item) => {
+    otherInfoData.forEach((item) => {
       // Set the bullet point character (•)
       const bulletPoint = "• ";
 
