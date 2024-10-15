@@ -45,25 +45,46 @@ exports.createTraveller = async (req, res) => {
 
 // Get all Travellers with Pagination
 exports.getTravellers = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query; // Default pagination values
-
+  const { page = 1, limit = 10 } = req.query;
+  const { loggedInUser } = req.user; // Assuming req.user contains user info like role and id
   try {
-    const travellers = await Traveller.find()
-      .lean() // Performance optimization: returns plain JS objects
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+    let travellers;
+    let total;
 
-    const total = await Traveller.countDocuments();
+    if (loggedInUser.role === "Admin") {
+      // Admin: Can view all travellers
+      travellers = await Traveller.find()
+        .lean() // Performance optimization: returns plain JS objects
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+
+      total = await Traveller.countDocuments();
+    } else {
+      // Non-Admin: Can only view travellers assigned to them
+      travellers = await Traveller.find({ agentAssigned: loggedInUser._id })
+        .lean()
+        .skip((page - 1) * limit)
+        .limit(parseInt(limit));
+
+      total = await Traveller.countDocuments({
+        agentAssigned: loggedInUser._id,
+      });
+    }
 
     res.status(200).json({
+      status: "success",
       travellers,
-      currentPage: page,
+      currentPage: parseInt(page),
       totalPages: Math.ceil(total / limit),
       totalTravellers: total,
     });
   } catch (error) {
     logger.error(`Error fetching travellers: ${error.message}`);
-    res.status(500).json({ message: "Error fetching travellers", error });
+    res.status(500).json({
+      status: "error",
+      message: "Error fetching travellers",
+      error,
+    });
   }
 };
 
