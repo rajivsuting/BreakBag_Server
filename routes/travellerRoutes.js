@@ -17,4 +17,6 @@ router.put("/edit/:id", travellerController.updateTraveller);
 // Delete a Traveller by ID
 router.delete("/delete/:id", travellerController.deleteTraveller);
 
+router.post("/asign", travellerController.assignTravellerToAgent);
+
 module.exports = router;

@@ -1,5 +1,6 @@
 const Traveller = require("../models/traveller");
 const logger = require("../config/logger");
+const User = require("../models/User");
 
 // Utility function to handle errors
 const handleErrors = (error, res, customMessage = null) => {
@@ -115,5 +116,48 @@ exports.deleteTraveller = async (req, res) => {
     res.status(200).json({ message: "Traveller deleted successfully" });
   } catch (error) {
     handleErrors(error, res, "Error deleting traveller");
+  }
+};
+
+exports.assignTravellerToAgent = async (req, res) => {
+  try {
+    const { travellerId, agentId } = req.body; // Get traveller and agent IDs from request body
+
+    // Validate inputs
+    if (!travellerId || !agentId) {
+      return res
+        .status(400)
+        .json({ message: "Traveller ID and Agent ID are required." });
+    }
+
+    // Check if the agent exists and has the "Agent" role
+    const agent = await User.findOne({ _id: agentId, role: "Agent" });
+    if (!agent) {
+      return res
+        .status(404)
+        .json({ message: "Agent not found or is not assigned as an Agent." });
+    }
+
+    // Find and update the traveller with the assigned agent
+    const traveller = await Traveller.findByIdAndUpdate(
+      travellerId,
+      { agentAssigned: agentId },
+      { new: true } // Return the updated traveller
+    );
+
+    if (!traveller) {
+      return res.status(404).json({ message: "Traveller not found." });
+    }
+
+    return res.status(200).json({
+      message: "Traveller assigned to agent successfully",
+      data: traveller,
+    });
+  } catch (err) {
+    console.error("Error assigning traveller to agent:", err);
+    return res.status(500).json({
+      message: "Error assigning traveller to agent",
+      error: err.message,
+    });
   }
 };
