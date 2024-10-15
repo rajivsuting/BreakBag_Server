@@ -57,35 +57,40 @@ exports.getAllActivity = async (req, res) => {
   }
 };
 
-exports.searchActivityByDestination = async (req, res) => {
-  const { destination } = req.params;
-
-  // Validate required field
-  if (!destination) {
-    return res.status(400).json({ message: "Destination is required" });
-  }
-
+exports.searchActivityByKeyword = async (req, res) => {
   try {
-    // Use a case-insensitive regular expression to search for a substring match
-    const activities = await Activity.find({
-      destination, // 'i' for case-insensitive, regex allows partial match
+    const { keyword } = req.query; // Get keyword from query parameters
+
+    if (!keyword) {
+      return res
+        .status(400)
+        .json({ message: "Keyword is required for search." });
+    }
+
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(keyword, "i");
+
+    // Search for activity where title or description matches the regex
+    const results = await Activity.find({
+      $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
     });
 
-    if (activities.length === 0) {
+    // Check if results were found
+    if (!results || results.length === 0) {
       return res.status(404).json({
-        message: "No activities found matching the destination pattern",
+        message: "No activity found matching the keyword.",
       });
     }
 
-    res.status(200).json({
-      message:
-        "Activities matching the destination pattern retrieved successfully",
-      data: activities,
+    return res.status(200).json({
+      message: "activity retrieved successfully",
+      data: results,
     });
-  } catch (error) {
-    console.error(`Error searching activities: ${error.message}`);
-    res
-      .status(500)
-      .json({ message: "Error searching activities", error: error.message });
+  } catch (err) {
+    console.error("Error retrieving activity:", err);
+    return res.status(500).json({
+      message: "Error retrieving activity",
+      error: err.message,
+    });
   }
 };
