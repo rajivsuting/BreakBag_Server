@@ -2,25 +2,17 @@ const Inclusion = require("../models/inclusion");
 
 exports.createInclusion = async (req, res) => {
   try {
-    const { itemList } = req.body;
-    const files = req.files;
+    const { title, description } = req.body;
 
-    if (!files || files.length === 0) {
-      return res.status(400).json({ message: "No images uploaded." });
-    }
-
-    const imageUrls = files.map((file) => file.location);
-
-    let parsedItemList;
-    try {
-      parsedItemList = JSON.parse(itemList);
-    } catch (err) {
-      return res.status(400).json({ message: "Invalid item list format." });
+    if (!title || !description) {
+      return res.status(400).json({
+        message: "Title and description are required",
+      });
     }
 
     const newInclusion = await Inclusion.create({
-      itemList: parsedItemList,
-      images: imageUrls,
+      title,
+      description,
     });
 
     return res.status(201).json({

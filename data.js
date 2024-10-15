@@ -190,6 +190,36 @@ const otherInfoData = {
   ],
 };
 
+const hotelData = [
+  {
+    name: "The Luxury Hotel",
+    checkInDate: "2024-12-01",
+    checkOutDate: "2024-12-05",
+    location: "Riga, Latvia",
+    mealPlan: "Breakfast included",
+    numberOfGuest: 3,
+    roomType: "Family room",
+  },
+  {
+    name: "Ocean View Resort",
+    checkInDate: "2024-12-10",
+    checkOutDate: "2024-12-15",
+    location: "Maldives",
+    mealPlan: "All-inclusive",
+    numberOfGuest: 2,
+    roomType: "Deluxe suite",
+  },
+  {
+    name: "Mountain Retreat Lodge",
+    checkInDate: "2024-12-20",
+    checkOutDate: "2024-12-25",
+    location: "Aspen, USA",
+    mealPlan: "Half-board",
+    numberOfGuest: 4,
+    roomType: "Luxury chalet",
+  },
+];
+
 module.exports = {
   travelSummaryDemo,
   costData,
@@ -197,4 +227,5 @@ module.exports = {
   inclusionData,
   exclusionsData,
   otherInfoData,
+  hotelData,
 };

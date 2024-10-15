@@ -10,6 +10,7 @@ const {
   inclusionData,
   exclusionsData,
   otherInfoData,
+  hotelData,
 } = require("../data.js");
 const { LakeFormation } = require("aws-sdk");
 
@@ -631,11 +632,11 @@ async function generatePDF(res) {
     const hotelText = "HOTEL";
     const infoText = "Information";
 
-    // Set font for "Tour" and calculate its width
+    // Set font for "Hotel" and calculate its width
     doc.font("Times-Bold").fontSize(32);
     const hotelTextWidth = doc.widthOfString(hotelText);
 
-    // Set font for "Cost" using Sacramento and calculate its width
+    // Set font for "Information" using Sacramento and calculate its width
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40);
@@ -648,21 +649,99 @@ async function generatePDF(res) {
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") // Set the color for "Tour"
-      .text(hotelText, costHeadingXPosition - 50, hotelYPosition, {
-        continued: true, // To print "Cost" on the same line
+      .fillColor("#053260") // Set the color for "Hotel"
+      .text(hotelText, InfoXPosition, hotelYPosition, {
+        continued: true, // To print "Information" on the same line
       });
 
-    // Print "Cost" with Sacramento font
+    // Print "Information" with Sacramento font
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#ff9c00") // Set the color for "Cost"
+      .fillColor("#ff9c00") // Set the color for "Information"
       .text(
         infoText,
         costHeadingXPosition + tourTextWidth - 145,
         hotelYPosition - 14
       );
+
+    // Add a bit of space after the heading
+    let hotelCardYPosition = hotelYPosition + 60; // Adjust the Y position for the first row of cards
+
+    // Define card dimensions
+    const cardPadding = 20; // Padding for top, bottom, left, and right
+    const cardWidth = (doc.page.width - 120) / 2; // Divide the page width by 2 minus margins
+    const cardHeight = 160; // Fixed height for the cards
+
+    let isLeftColumn = true; // To alternate between left and right columns
+    let cardXPosition = 40; // Starting X position for the left column
+
+    // Loop through the hotelData array to create a card for each hotel
+    hotelData.forEach((hotel, index) => {
+      // If it's the second card in the row, place it in the right column
+      if (!isLeftColumn) {
+        cardXPosition = doc.page.width / 2 + 20; // Right column X position
+      }
+
+      // Draw a rounded rectangle to represent the card background with border-radius
+      doc
+        .roundedRect(
+          cardXPosition,
+          hotelCardYPosition,
+          cardWidth,
+          cardHeight,
+          10
+        ) // 10 is the border radius
+        .fillAndStroke("#f0f0f0", "#053260") // Light background with a border color
+        .stroke(); // Draw the border
+
+      // Shift text 5 pixels to the left
+      const textXPosition = cardXPosition + cardPadding - 5;
+
+      // Add hotel name at the top of the card (center-aligned)
+      doc
+        .font("Times-Bold")
+        .fontSize(16)
+        .fillColor("#053260")
+        .text(hotel.name, textXPosition, hotelCardYPosition + 10, {
+          width: cardWidth - 2 * cardPadding, // Fit text within the card width
+          align: "center", // Center-align the text
+        });
+
+      // Add check-in date, check-out date, and other details (center-aligned)
+      const hotelDetails = `
+      Check-In: ${hotel.checkInDate}
+      Check-Out: ${hotel.checkOutDate}
+      Location: ${hotel.location}
+      Meal Plan: ${hotel.mealPlan}
+      Number of Guests: ${hotel.numberOfGuest}
+      Room: ${hotel.roomType}
+      `;
+
+      // Add the hotel details inside the card (center-aligned)
+      doc
+        .font("Times-Roman")
+        .fontSize(12)
+        .fillColor("#000000")
+        .text(hotelDetails, textXPosition, hotelCardYPosition + 40, {
+          width: cardWidth - 2 * cardPadding, // Ensure the text stays within the card
+          align: "center", // Center-align the text
+          lineGap: 3, // Add line spacing for readability
+        });
+
+      // If the card is on the right column, move to the next row
+      if (!isLeftColumn) {
+        hotelCardYPosition += cardHeight + 30; // Space between rows
+      }
+
+      // Alternate between left and right columns for the next card
+      isLeftColumn = !isLeftColumn;
+
+      // Reset X position for the left column in the next row
+      if (isLeftColumn) {
+        cardXPosition = 40;
+      }
+    });
 
     let dayCount = 1;
     // start the detailed itenerary from here

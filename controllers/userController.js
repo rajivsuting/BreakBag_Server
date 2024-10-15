@@ -41,22 +41,23 @@ exports.createUser = async (req, res) => {
 };
 
 // Get all agents
-exports.getAllAgents = async (req, res) => {
+exports.getAllAgentsOrTeamleads = async (req, res) => {
   try {
-    const agents = await User.find({ role: "Agent" });
+    const { role } = req.query;
+    const agents = await User.find({ role: role });
 
     if (agents.length === 0) {
-      return res.status(404).json({ message: "No agents found" });
+      return res.status(404).json({ message: `No ${role} found` });
     }
 
     return res.status(200).json({
-      message: "Agents retrieved successfully",
+      message: `${role} retrieved successfully`,
       data: agents,
     });
   } catch (err) {
-    console.error("Error retrieving agents:", err);
+    console.error(`Error retrieving ${role}:`, err);
     return res.status(500).json({
-      message: "Error retrieving agents",
+      message: `Error retrieving ${role}`,
       error: err.message,
     });
   }

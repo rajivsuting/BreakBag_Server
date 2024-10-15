@@ -9,7 +9,6 @@ router.post(
   "/inclusions/create",
   //   protect, // Protect the route to ensure only authenticated users can access
   //   restrictTo("admin"), // Restrict this route to admin users only
-  upload.array("images", 5), // Upload up to 5 images with the field name 'images'
   inclusionController.createInclusion
 );
 
