@@ -85,6 +85,7 @@ exports.login = async (req, res) => {
 };
 
 // Verify OTP and login
+// Verify OTP and login
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -115,9 +116,20 @@ exports.verifyOtp = async (req, res) => {
     user.otpExpiry = undefined;
     await user.save();
 
-    res
-      .status(200)
-      .json({ token, role: user.role, isTeamlead: user.isTeamlead, user });
+    // Set cookie with JWT token, HTTP-only and secure (if using HTTPS)
+    res.cookie("token", token, {
+      httpOnly: true, // Prevents client-side JS from accessing the cookie
+      secure: process.env.NODE_ENV === "production", // Ensures the cookie is only sent over HTTPS in production
+      maxAge: 24 * 60 * 60 * 1000, // Expires in 1 day
+      sameSite: "strict", // Protects against CSRF attacks
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      role: user.role,
+      isTeamlead: user.isTeamlead,
+      user,
+    });
   } catch (error) {
     logger.error(`Error verifying OTP: ${error.message}`);
     res.status(500).json({ message: "OTP verification failed", error });

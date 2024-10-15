@@ -16,6 +16,9 @@ const userRoutes = require("./routes/userRoutes");
 const logger = require("./config/logger");
 const connectDB = require("./db/connectDB");
 
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
