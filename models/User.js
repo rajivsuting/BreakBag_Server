@@ -7,7 +7,7 @@ const userSchema = new Schema({
   phone: { type: String, required: true }, // Add phone for OTP verification
   role: {
     type: String,
-    enum: ["Admin", "Agent", " Team Lead"],
+    enum: ["Admin", "Agent", "Team Lead"],
     required: true,
   },
   teamLead: {

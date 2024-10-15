@@ -36,6 +36,23 @@ app.use("/api/quote", quoteRoutes);
 app.use("/api/agent", userRoutes);
 app.use("/api/pdf", pdfRoutes);
 
+app.get("/hotels", async (req, res) => {
+  const { location, radius = 5000, type = "lodging" } = req.query;
+  const apiKey = "AIzaSyBSDhdL2tinLiAKRk7w9JhDAv5gAQXFMIk";
+  console.log(location, radius, type);
+  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data.results);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching data from Google Places API" });
+  }
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

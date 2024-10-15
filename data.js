@@ -41,15 +41,6 @@ const costData = [
   },
 ];
 
-const hotelInfo = [
-  {
-    city: "San Francisco",
-    hotelName: "Marriott San Francisco",
-    rating: 4.5,
-    pricePerNight: 150,
-  },
-];
-
 const detailedIteneraryData = [
   {
     title: "Mountain Hiking Adventure",
@@ -193,6 +184,15 @@ const otherInfoData = {
 const hotelData = [
   {
     name: "The Luxury Hotel",
+    checkInDate: "2024-12-01",
+    checkOutDate: "2024-12-05",
+    location: "Riga, Latvia",
+    mealPlan: "Breakfast included",
+    numberOfGuest: 3,
+    roomType: "Family room",
+  },
+  {
+    name: "The Luxury Hotel Rajiv Suting",
     checkInDate: "2024-12-01",
     checkOutDate: "2024-12-05",
     location: "Riga, Latvia",
