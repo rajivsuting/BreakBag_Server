@@ -181,6 +181,7 @@ exports.createIntenerary = async (req, res) => {
     selectedOtherInformation,
     selectedTransfers,
     selectedInclusions,
+    activityPerDay,
   } = req.body;
   try {
     const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
@@ -197,6 +198,14 @@ exports.createIntenerary = async (req, res) => {
       numberOfGuest: parseInt(hotel.numberOfGuest), // converting to number
       roomType: hotel.roomType,
     }));
+
+    const detailedItineraryData = activityPerDay.map((activity) => ({
+      title: activity.summaryDetails.title,
+      description: activity.summaryDetails.description,
+      images: activity.summaryDetails.images, // No default images needed
+    }));
+
+    console.log(detailedItineraryData);
 
     const otherInfoData = selectedOtherInformation.map(
       (info) => info.description
@@ -225,6 +234,7 @@ exports.createIntenerary = async (req, res) => {
       res,
       travelSummaryDemo,
       priceDetails,
+      detailedItineraryData,
       inclusionData,
       exclusionsData,
       otherInfoData,

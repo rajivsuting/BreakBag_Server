@@ -6,7 +6,7 @@ const fs = require("fs");
 const {
   // travelSummaryDemo,
   // costData,
-  detailedIteneraryData,
+  // detailedIteneraryData,
   // inclusionData,
   // exclusionsData,
   // otherInfoData,
@@ -33,6 +33,7 @@ async function generatePDF(
   res,
   travelSummaryDemo,
   costData,
+  detailedItineraryData,
   inclusionData,
   exclusionsData,
   otherInfoData,

@@ -254,6 +254,7 @@ const input = {
       summaryDetails: {
         title: "first",
         description: ["first", "second"],
+        images: [],
       },
       isSaved: false,
     },
@@ -262,6 +263,7 @@ const input = {
       summaryDetails: {
         title: "Title 1",
         description: ["first 1", "first 2", "first 3"],
+        images: [],
       },
       isSaved: false,
     },
