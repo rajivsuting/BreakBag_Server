@@ -36,7 +36,8 @@ async function generatePDF(
   inclusionData,
   exclusionsData,
   otherInfoData,
-  hotelData
+  hotelData,
+  transfersProcessData
 ) {
   try {
     // Create a new PDF document with A4 size

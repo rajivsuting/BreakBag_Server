@@ -10,3 +10,9 @@
 2024-10-10T12:07:48.970Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.
 2024-10-10T12:07:55.890Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.
 2024-10-10T12:07:56.101Z error: Error fetching travel summaries: Cannot populate path `Destination` because it is not in your schema. Set the `strictPopulate` option to false to override.
+2024-10-16T04:13:39.705Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')
+2024-10-16T04:13:39.729Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')
+2024-10-16T04:14:02.805Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')
+2024-10-16T04:14:02.821Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')
+2024-10-16T04:14:13.352Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')
+2024-10-16T04:14:13.370Z error: Error fetching travellers: Cannot read properties of undefined (reading 'role')

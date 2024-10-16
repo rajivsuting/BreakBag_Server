@@ -1,5 +1,5 @@
 const Quote = require("../models/quote");
-const generatePDF = require("../service/pdfService");
+const { generatePDF } = require("../service/pdfService");
 
 exports.createQuote = async (req, res) => {
   try {
@@ -228,7 +228,8 @@ exports.createIntenerary = async (req, res) => {
       inclusionData,
       exclusionsData,
       otherInfoData,
-      hotelData
+      hotelData,
+      transfersProcessData
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);

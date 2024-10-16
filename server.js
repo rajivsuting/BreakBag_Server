@@ -41,9 +41,8 @@ app.use("/api/pdf", pdfRoutes);
 
 app.get("/hotels", async (req, res) => {
   const { location, radius = 5000, type = "lodging" } = req.query;
-  const apiKey = "AIzaSyBSDhdL2tinLiAKRk7w9JhDAv5gAQXFMIk";
   console.log(location, radius, type);
-  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${apiKey}`;
+  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${process.env.GOOGLE_API_KEY}`;
 
   try {
     const response = await fetch(url);
