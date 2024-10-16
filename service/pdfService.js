@@ -33,7 +33,7 @@ async function generatePDF(
   res,
   travelSummaryDemo,
   costData,
-  detailedItineraryData,
+  detailedIteneraryData,
   inclusionData,
   exclusionsData,
   otherInfoData,
