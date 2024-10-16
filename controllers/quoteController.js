@@ -182,6 +182,7 @@ exports.createIntenerary = async (req, res) => {
     selectedTransfers,
     selectedInclusions,
     activityPerDay,
+    destination,
   } = req.body;
   try {
     const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
@@ -204,8 +205,6 @@ exports.createIntenerary = async (req, res) => {
       description: activity.summaryDetails.description,
       images: activity.summaryDetails.images, // No default images needed
     }));
-
-    console.log(detailedItineraryData);
 
     const otherInfoData = selectedOtherInformation.map(
       (info) => info.description
@@ -239,7 +238,8 @@ exports.createIntenerary = async (req, res) => {
       exclusionsData,
       otherInfoData,
       hotelData,
-      transfersProcessData
+      transfersProcessData,
+      destination
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);

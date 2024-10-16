@@ -38,7 +38,8 @@ async function generatePDF(
   exclusionsData,
   otherInfoData,
   hotelData,
-  transfersProcessData
+  transfersProcessData,
+  destination
 ) {
   try {
     // Create a new PDF document with A4 size
@@ -83,7 +84,7 @@ async function generatePDF(
       width: logoWidth, // Rescale the logo
     });
 
-    const imagePath = path.join(__dirname, "..", "images", "first.jpg");
+    const imagePath = await fetchImage(destination.image);
 
     // Get the dimensions of the page
     const pageWidth = doc.page.width;
