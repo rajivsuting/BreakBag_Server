@@ -46,7 +46,7 @@ exports.createTraveller = async (req, res) => {
 // Get all Travellers with Pagination
 exports.getTravellers = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
-  const { loggedInUser } = req.user; // Assuming req.user contains user info like role and id
+  const loggedInUser = req.user; // Assuming req.user contains user info like role and id
   try {
     let travellers;
     let total;
