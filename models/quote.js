@@ -72,6 +72,11 @@ const quoteSchema = new Schema({
     required: true,
   },
   comments: [commentSchema],
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
 });
 
 quoteSchema.pre("save", async function (next) {

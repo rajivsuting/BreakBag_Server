@@ -4,6 +4,7 @@ const { generatePDF } = require("../service/pdfService");
 exports.createQuote = async (req, res) => {
   try {
     const { travellers, destination, startDate, endDate } = req.body;
+    const { user } = require(req.user);
 
     // Validate required fields
     if (!travellers || travellers.length === 0) {
@@ -48,6 +49,7 @@ exports.createQuote = async (req, res) => {
       startDate,
       endDate,
       duration, // Calculated duration in days
+      createdBy: user,
     });
 
     // Send a success response
@@ -65,14 +67,27 @@ exports.createQuote = async (req, res) => {
 
 exports.getAllQuotes = async (req, res) => {
   try {
+    const { user } = req.user;
+    let quotes;
+    if (user === "Admin") {
+      quotes = await Quote.find()
+        .populate("travellers", "name email") // Populate traveller's name and email
+        .populate("destination", "title")
+        .populate({
+          path: "comments.author", // Populate author field within comments
+          select: "name email", // Only retrieve name and email from the User model
+        });
+    } else {
+      quotes = await Quote.find({ createdBy: user })
+        .populate("travellers", "name email") // Populate traveller's name and email
+        .populate("destination", "title")
+        .populate({
+          path: "comments.author", // Populate author field within comments
+          select: "name email", // Only retrieve name and email from the User model
+        })
+        .populate("createdBy");
+    }
     // Fetch all quotes and populate the traveller and destination details
-    const quotes = await Quote.find()
-      .populate("travellers", "name email") // Populate traveller's name and email
-      .populate("destination", "title")
-      .populate({
-        path: "comments.author", // Populate author field within comments
-        select: "name email", // Only retrieve name and email from the User model
-      });
 
     if (!quotes || quotes.length === 0) {
       return res.status(404).json({ message: "No quotes found." });
