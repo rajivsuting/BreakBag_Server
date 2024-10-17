@@ -4,10 +4,10 @@ const quoteController = require("../controllers/quoteController");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
 // Route to create a new quote
-router.post("/quotes", quoteController.createQuote);
+router.post("/quotes", protect, quoteController.createQuote);
 
 // Route to get all quotes
-router.get("/quotes", quoteController.getAllQuotes);
+router.get("/quotes", protect, quoteController.getAllQuotes);
 
 router.get("/quotes/:tripId", quoteController.getQuoteByTripId);
 

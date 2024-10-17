@@ -125,7 +125,7 @@ exports.verifyOtp = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       role: user.role,
-      isTeamlead: user.isTeamlead,
+      token: token,
       user,
     });
   } catch (error) {

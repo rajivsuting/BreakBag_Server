@@ -4,7 +4,8 @@ const { generatePDF } = require("../service/pdfService");
 exports.createQuote = async (req, res) => {
   try {
     const { travellers, destination, startDate, endDate } = req.body;
-    const { user } = require(req.user);
+    const { userId } = req.user;
+    // console.log("post",req.user)
 
     // Validate required fields
     if (!travellers || travellers.length === 0) {
@@ -49,7 +50,7 @@ exports.createQuote = async (req, res) => {
       startDate,
       endDate,
       duration, // Calculated duration in days
-      createdBy: user,
+      createdBy: userId,
     });
 
     // Send a success response
@@ -67,18 +68,20 @@ exports.createQuote = async (req, res) => {
 
 exports.getAllQuotes = async (req, res) => {
   try {
-    const { user } = req.user;
+    const { userId } = req.user;
+    const { role } = req.user;
+// console.log("get",req.user)
     let quotes;
-    if (user === "Admin") {
+    if (role === "Admin") {
       quotes = await Quote.find()
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
         .populate({
           path: "comments.author", // Populate author field within comments
           select: "name email", // Only retrieve name and email from the User model
-        });
+        }).populate("createdBy");;
     } else {
-      quotes = await Quote.find({ createdBy: user })
+      quotes = await Quote.find({ createdBy: userId })
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
         .populate({
@@ -116,9 +119,13 @@ exports.getQuoteByTripId = async (req, res) => {
     }
 
     // Fetch the quote by tripId from the database
-    const quote = await Quote.findOne({ tripId }).populate(
-      "travellers destination"
-    );
+    const quote = await Quote.findOne({ tripId }).populate("travellers", "name email") // Populate traveller's name and email
+    .populate("destination", "title")
+    .populate({
+      path: "comments.author", // Populate author field within comments
+      select: "name email", // Only retrieve name and email from the User model
+    })
+    .populate("createdBy");
 
     // If no quote is found, return a 404 response
     if (!quote) {
