@@ -245,7 +245,8 @@ exports.getUserPerformance = async (req, res) => {
     if (userQuotes.length === 0) {
       return res.status(200).json({
         message: "No quotes found for this user.",
-        data: { performance: 0, averageRating: 0 },
+        
+        data: {user, performance: 0, averageRating: 0 },
       });
     }
 
