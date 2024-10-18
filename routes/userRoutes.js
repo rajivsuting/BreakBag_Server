@@ -27,4 +27,6 @@ router.post(
   userController.assignAgentsToTeamLead
 );
 
+router.get("/quotes", userController.getUserPerformance);
+
 module.exports = router;

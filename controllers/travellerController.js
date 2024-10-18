@@ -45,39 +45,43 @@ exports.createTraveller = async (req, res) => {
 
 // Get all Travellers with Pagination
 exports.getTravellers = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  // const { page = 1, limit = 10 } = req.query;
   const loggedInUser = req.user; // Assuming req.user contains user info like role and id
-  console.log(req.user)
+  // console.log(req.user);
   try {
     let travellers;
     let total;
 
     if (loggedInUser.role === "Admin") {
       // Admin: Can view all travellers
-      travellers = await Traveller.find()
-        .lean() // Performance optimization: returns plain JS objects
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit));
+      travellers = await Traveller.find().lean(); // Performance optimization: returns plain JS objects
+      // .skip((page - 1) * limit)
+      // .limit(parseInt(limit));
 
-      total = await Traveller.countDocuments();
+      // total = await Traveller.countDocuments();
     } else {
       // Non-Admin: Can only view travellers assigned to them
-      travellers = await Traveller.find({ agentAssigned: loggedInUser.userId })
-        .lean()
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit));
-
-      total = await Traveller.countDocuments({
+      travellers = await Traveller.find({
         agentAssigned: loggedInUser.userId,
-      });
+      }).lean();
+      // .skip((page - 1) * limit)
+      // .limit(parseInt(limit));
+
+      // total = await Traveller.countDocuments({
+      //   agentAssigned: loggedInUser.userId,
+      // });
+    }
+
+    if (travellers.length === 0) {
+      return res.status(404).json({ message: "No travellers found." });
     }
 
     res.status(200).json({
       status: "success",
       travellers,
-      currentPage: parseInt(page),
-      totalPages: Math.ceil(total / limit),
-      totalTravellers: total,
+      // currentPage: parseInt(page),
+      // totalPages: Math.ceil(total / limit),
+      // totalTravellers: total,
     });
   } catch (error) {
     logger.error(`Error fetching travellers: ${error.message}`);

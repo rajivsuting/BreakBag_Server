@@ -1,4 +1,5 @@
 const User = require("../models/User"); // Assuming the User model is in the models folder
+const Quote = require("../models/quote");
 
 exports.createUser = async (req, res) => {
   const { name, email, phone, role, teamLeadId } = req.body;
@@ -219,6 +220,47 @@ exports.assignAgentsToTeamLead = async (req, res) => {
     console.error("Error assigning agents:", err);
     return res.status(500).json({
       message: "Error assigning agents",
+      error: err.message,
+    });
+  }
+};
+
+exports.getUserPerformance = async (req, res) => {
+  try {
+    const { userId } = req.query; // Get User ID from request parameters
+
+    // Validate inputs
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required." });
+    }
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const userQuotes = await Quote.find({ createdBy: userId });
+
+    if (userQuotes.length === 0) {
+      return res.status(200).json({
+        message: "No quotes found for this user.",
+        data: { performance: 0, averageRating: 0 },
+      });
+    }
+
+    res.status(200).json({
+      message: "User performance retrieved successfully",
+      data: {
+        totalQuotes: userQuotes.length,
+        quotes: userQuotes,
+        user,
+      },
+    });
+  } catch (err) {
+    console.error("Error retrieving user performance:", err);
+    return res.status(500).json({
+      message: "Error retrieving user performance",
       error: err.message,
     });
   }
