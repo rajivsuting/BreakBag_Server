@@ -55,7 +55,7 @@ exports.getAllAgentsOrTeamleads = async (req, res) => {
       data: agents,
     });
   } catch (err) {
-    console.error(`Error retrieving ${role}:`, err);
+    // console.error(`Error retrieving ${role}:`, err);
     return res.status(500).json({
       message: `Error retrieving ${role}`,
       error: err.message,

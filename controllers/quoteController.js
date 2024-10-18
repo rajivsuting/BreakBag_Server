@@ -271,3 +271,26 @@ exports.createIntenerary = async (req, res) => {
     });
   }
 };
+
+
+exports.editquote =async (req, res) => {
+  const { quoteid } = req.params;
+  const updateData = req.body;
+
+  try {
+    // Find the document by ID and update it
+    const updatedQuote = await Quote.findByIdAndUpdate(
+      quoteid,
+      { $set: updateData }, // Only updates the fields provided in the request body
+      { new: true, runValidators: true } // Returns the updated document and runs schema validators
+    );
+
+    if (!updatedQuote) {
+      return res.status(404).json({ message: "Quote not found" });
+    }
+
+    res.status(200).json({ message: "Quote updated successfully", updatedQuote });
+  } catch (error) {
+    res.status(400).json({ message: "Error updating quote", error: error.message });
+  }
+};

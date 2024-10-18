@@ -47,6 +47,7 @@ exports.createTraveller = async (req, res) => {
 exports.getTravellers = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const loggedInUser = req.user; // Assuming req.user contains user info like role and id
+  console.log(req.user)
   try {
     let travellers;
     let total;

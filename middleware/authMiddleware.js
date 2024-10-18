@@ -1,15 +1,15 @@
 const jwt = require("jsonwebtoken");
 
 exports.protect = (req, res, next) => {
-  // let token;
+  let token;
 
-  // if (
-  //   req.headers.authorization &&
-  //   req.headers.authorization.startsWith("Bearer")
-  // ) {
-  //   token = req.headers.authorization.split(" ")[1];
-  // }
-  const token = req.cookies.token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+  // const token = req.cookies.token;
 // console.log(token);
 
   if (!token) {
