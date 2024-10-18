@@ -30,21 +30,20 @@ exports.createTravelSummary = async (req, res) => {
 
 // Get all Travel Summaries with Pagination
 exports.getAllTravelSummary = async (req, res) => {
-  const { page = 1, limit = 10 } = req.query;
+  // const { page = 1, limit = 10 } = req.query;
 
   try {
-    const travelSummaries = await TravelSummary.find()
-      .lean() // Performance optimization
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+    const travelSummaries = await TravelSummary.find().lean(); // Performance optimization
+    // .skip((page - 1) * limit)
+    // .limit(parseInt(limit));
 
-    const total = await TravelSummary.countDocuments();
+    // const total = await TravelSummary.countDocuments();
 
     res.status(200).json({
       travelSummaries,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalSummaries: total,
+      // currentPage: page,
+      // totalPages: Math.ceil(total / limit),
+      // totalSummaries: total,
     });
   } catch (error) {
     logger.error(`Error fetching travel summaries: ${error.message}`);
