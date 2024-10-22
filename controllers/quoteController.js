@@ -120,7 +120,7 @@ exports.getQuoteByTripId = async (req, res) => {
 
     // Fetch the quote by tripId from the database
     const quote = await Quote.findOne({ tripId }).populate("travellers", "name email") // Populate traveller's name and email
-    .populate("destination", "title")
+    .populate("destination")
     .populate({
       path: "comments.author", // Populate author field within comments
       select: "name email", // Only retrieve name and email from the User model
