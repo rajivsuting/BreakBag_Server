@@ -204,7 +204,7 @@ exports.createIntenerary = async (req, res) => {
     selectedTransfers,
     selectedInclusions,
     activityPerDay,
-    destination,
+    destinationOnly,
   } = req.body;
   try {
     const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
@@ -261,7 +261,7 @@ exports.createIntenerary = async (req, res) => {
       otherInfoData,
       hotelData,
       transfersProcessData,
-      destination
+      destinationOnly
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);

@@ -106,7 +106,7 @@ exports.verifyOtp = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role, isTeamlead: user.isTeamlead },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" } // Token expires in 24 hours
+      { expiresIn: "3m" } // Token expires in 24 hours
     );
 
     // Clear OTP-related fields after successful login
