@@ -26,13 +26,12 @@ app.use(cookieParser());
 
 connectDB();
 
-
-app.use("/api/validateToken", protect,(req,tes)=>{
-    try {
-      res.send("Working")
-    } catch (error) {
-      res.send(error)
-    }
+app.use("/api/validateToken", protect, (req, res) => {
+  try {
+    res.send("Working");
+  } catch (error) {
+    res.send(error);
+  }
 });
 // Routes
 app.use("/api/auth", authRoutes);
