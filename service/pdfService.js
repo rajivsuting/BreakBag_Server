@@ -3,15 +3,7 @@ const axios = require("axios");
 const path = require("path");
 
 const fs = require("fs");
-const {
-  // travelSummaryDemo,
-  // costData,
-  // detailedIteneraryData,
-  // inclusionData,
-  // exclusionsData,
-  // otherInfoData,
-  // hotelData,
-} = require("../data.js");
+
 const { LakeFormation } = require("aws-sdk");
 
 // Helper function to fetch image data from a URL
@@ -71,6 +63,19 @@ async function generatePDF(
     // });
 
     const logoImage = path.join(__dirname, "..", "images", "logo.png"); // Adjust path as needed
+    const imagePath = await fetchImage(destinationOnly?.image);
+
+    // Get the dimensions of the page
+    const pageWidth = doc.page.width;
+    const pageHeight = doc.page.height;
+
+    // Add the background image first (covers entire page)
+    doc.image(imagePath, 0, 0, {
+      width: pageWidth,
+      height: pageHeight,
+      align: "center", // Optional, to center the image
+      valign: "center", // Optional, to center the image vertically
+    });
 
     // Set desired logo width
     const logoWidth = 100; // Adjust the size to fit your design
@@ -79,23 +84,9 @@ async function generatePDF(
     const logoXPosition = doc.page.width - logoWidth - 10; // 10px padding from the right
     const yPosition = 10; // 10px padding from the top
 
-    // Add the logo (ensure it only appears once)
+    // Add the logo on top of the background image
     doc.image(logoImage, logoXPosition, yPosition, {
       width: logoWidth, // Rescale the logo
-    });
-
-    const imagePath = await fetchImage(destinationOnly?.image);
-
-    // Get the dimensions of the page
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
-
-    // Add the image to the page, covering the entire page
-    doc.image(imagePath, 0, 0, {
-      width: pageWidth,
-      height: pageHeight,
-      align: "center", // Optional, to center the image
-      valign: "center", // Optional, to center the image vertically
     });
 
     // ---------------------Second Page --------------------
@@ -750,7 +741,7 @@ async function generatePDF(
     });
 
     let dayCount = 1;
-    // start the detailed itenerary from here
+    // Start the detailed itinerary from here
     for (const item of detailedIteneraryData) {
       // Add a new page for each itinerary item
       doc.addPage();
@@ -760,88 +751,96 @@ async function generatePDF(
         fit: [100, 100],
       });
 
-      const rectDayHeight = 40;
-      const rectDayWidth = 120; // Width of the rectangle
-      const rectDayYPosition = doc.page.height - padding - rectDayHeight - 710; // Position of the rectangle
+      const rectDayHeight = 40; // Reduced height by 20
+      const rectDayWidth = 120;
+      const rectDayYPosition = doc.page.height - padding - rectDayHeight - 710;
 
       // Draw the rectangle with color #ff9c00
       doc
         .rect(0, rectDayYPosition, rectDayWidth, rectDayHeight)
         .fill("#ff9c00");
 
-      // Add the text "DAY 1" centered in the rectangle
+      // Add the text "DAY X" centered in the rectangle
       doc
-        .font("Times-Bold") // Set the font
-        .fontSize(24) // Set the font size
-        .fillColor("white") // Set the text color
+        .font("Times-Bold")
+        .fontSize(24)
+        .fillColor("white")
         .text(
           `DAY ${dayCount}`,
           0,
           rectDayYPosition + 10 + rectDayHeight / 2 - 9,
           {
-            // Position the text in the center of the rectangle
             width: rectDayWidth,
-            align: "center", // Center align the text
-            baseline: "middle", // Ensure vertical centering
+            align: "center",
+            baseline: "middle",
           }
         );
       dayCount++;
+
       // Set initial Y position
       let currentY = padding + 100;
 
-      // Set the widths for the images
-      const largeImageWidth = doc.page.width * 0.7 - 2 * padding; // 69% of the page width for the large image
-      const sidebarWidth = doc.page.width * 0.385 - 2 * padding; // Adjusted sidebar width for better alignment
-      const largeImageHeight = 390; // Set a fixed height for the large image
-      const sidebarImageHeight = largeImageHeight / 2.5; // Adjust the height of the sidebar images, no gap subtraction
+      // Define new dimensions for the rectangles and images
+      const largeImageWidth = doc.page.width * 0.7 - 2 * padding;
+      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50; // Increased right sidebar width by 20
+      const adjustedHeight = 320; // Reduced height by 20 pixels
+      const largeImageHeight = adjustedHeight;
+      const sidebarImageHeight = adjustedHeight / 2.1; // Each sidebar rectangle is half the large image height
+      const gap = 10;
 
-      const largeImageYPosition = currentY; // Position for the large image
-      const sidebarImage1YPosition = largeImageYPosition; // Align the first sidebar image with the large image
-      const sidebarImage2YPosition =
-        sidebarImage1YPosition - 31 + sidebarImageHeight; // Directly place the second sidebar image below the first one
+      // Draw a large rectangle for the left image
+      doc
+        .rect(padding, currentY, largeImageWidth, largeImageHeight)
+        .fillAndStroke("#f0f0f0", "#ccc");
 
-      // Fetch the first (large) image
+      // Draw two sidebar rectangles on the right
+      const sidebarXPosition = padding + largeImageWidth + gap;
+      doc
+        .rect(sidebarXPosition, currentY, sidebarWidth, sidebarImageHeight)
+        .fillAndStroke("#f0f0f0", "#ccc");
+
+      doc
+        .rect(
+          sidebarXPosition,
+          currentY + sidebarImageHeight + gap,
+          sidebarWidth,
+          sidebarImageHeight
+        )
+        .fillAndStroke("#f0f0f0", "#ccc");
+
+      // Fetch and fit the images into the rectangles
       const largeImageUrl = item.images[0];
       const largeImageData = await fetchImage(largeImageUrl);
-
-      // Add the large image to the left (69% of the width)
-      doc.image(largeImageData, padding, largeImageYPosition, {
-        fit: [largeImageWidth, largeImageHeight],
+      doc.image(largeImageData, padding, currentY, {
+        width: largeImageWidth,
+        height: largeImageHeight, // Fit image to fill the large rectangle
       });
 
-      // Fetch the second and third (sidebar) images if they exist
       if (item.images[1]) {
         const sidebarImage1Url = item.images[1];
         const sidebarImage1Data = await fetchImage(sidebarImage1Url);
-
-        // Add the first sidebar image (aligned with the large image, 31% of width)
-        doc.image(
-          sidebarImage1Data,
-          padding + largeImageWidth + 10, // Position to the right of the large image with minimal gap
-          sidebarImage1YPosition,
-          {
-            fit: [sidebarWidth, sidebarImageHeight],
-          }
-        );
+        doc.image(sidebarImage1Data, sidebarXPosition, currentY, {
+          width: sidebarWidth,
+          height: sidebarImageHeight, // Fit image to fill the first sidebar rectangle
+        });
       }
 
       if (item.images[2]) {
         const sidebarImage2Url = item.images[2];
         const sidebarImage2Data = await fetchImage(sidebarImage2Url);
-
-        // Add the second sidebar image directly below the first sidebar image
         doc.image(
           sidebarImage2Data,
-          padding + largeImageWidth + 10, // Position to the right of the large image with minimal gap
-          sidebarImage2YPosition,
+          sidebarXPosition,
+          currentY + sidebarImageHeight + gap,
           {
-            fit: [sidebarWidth, sidebarImageHeight],
+            width: sidebarWidth,
+            height: sidebarImageHeight, // Fit image to fill the second sidebar rectangle
           }
         );
       }
 
-      // Update currentY after images
-      currentY = largeImageYPosition + largeImageHeight - 100; // Adjust the currentY after images
+      // Update currentY to start text below the images without overlapping
+      currentY += largeImageHeight + 20;
 
       // Add the title below the images
       doc
@@ -853,40 +852,30 @@ async function generatePDF(
           width: doc.page.width - 2 * padding,
         });
 
-      currentY += 35; // Update Y position after title
+      currentY += 35;
 
-      // Define maximum width for the text wrapping (you can adjust this based on your layout)
-      const maxWidth = doc.page.width - 2 * padding - 20; // Leave space for the bullet point indentation
-      const bulletPointIndent = 35; // X position for the bullet point
-      const descriptionIndent = bulletPointIndent + 10; // Indentation for the description text
+      // Define maximum width for text and indentation
+      const maxWidth = doc.page.width - 2 * padding - 20;
+      const bulletPointIndent = 35;
+      const descriptionIndent = bulletPointIndent + 10;
 
-      // Loop through the description array and print each item with a bullet point
+      // Loop through description items and print with bullet points
       item.description.forEach((desc) => {
-        // Set the bullet point character (•)
         const bulletPoint = "• ";
 
-        // Set the font size and color for bullet points
-        doc
-          .font("Times-Roman") // Change font as needed
-          .fontSize(14) // Set font size to 14
-          .fillColor("black"); // Set the color for the text
-
-        // Print the bullet point first
+        doc.font("Times-Roman").fontSize(14).fillColor("black");
         doc.text(bulletPoint, bulletPointIndent, currentY);
 
-        // Print the description next to the bullet point with automatic text wrapping
         doc.text(desc, descriptionIndent, currentY, {
-          width: maxWidth, // Set max width for text wrapping
-          lineGap: 5, // Set line height between lines of text
+          width: maxWidth,
+          lineGap: 5,
         });
 
-        // Calculate the height of the wrapped text
         const itemHeight = doc.heightOfString(desc, { width: maxWidth });
-
-        // Increment the Y position for the next bullet point, based on the height of the current item
-        currentY += itemHeight + 19; // Add spacing between items
+        currentY += itemHeight + 19;
       });
     }
+
     // --------TRIP Inclusion ---------------------------
 
     doc.addPage();
