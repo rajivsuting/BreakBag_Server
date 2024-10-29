@@ -48,9 +48,15 @@ app.use("/api/agent", userRoutes);
 app.use("/api/pdf", pdfRoutes);
 
 app.get("/hotels", async (req, res) => {
-  const { location, radius = 5000, type = "lodging" } = req.query;
-  console.log(location, radius, type);
-  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location}&radius=${radius}&type=${type}&key=${process.env.GOOGLE_API_KEY}`;
+  const { location, radius = 5000, type = "lodging", name } = req.query;
+  console.log(location, radius, type, name);
+
+  // Use `name` from the query parameter (sent from client) and default to "hotel" if not provided
+  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+    name || "hotel"
+  )}+in+${location}&radius=${radius}&type=${type}&key=${
+    process.env.GOOGLE_API_KEY
+  }`;
 
   try {
     const response = await fetch(url);

@@ -70,7 +70,7 @@ exports.getAllQuotes = async (req, res) => {
   try {
     const { userId } = req.user;
     const { role } = req.user;
-// console.log("get",req.user)
+    // console.log("get",req.user)
     let quotes;
     if (role === "Admin") {
       quotes = await Quote.find()
@@ -79,7 +79,8 @@ exports.getAllQuotes = async (req, res) => {
         .populate({
           path: "comments.author", // Populate author field within comments
           select: "name email", // Only retrieve name and email from the User model
-        }).populate("createdBy");;
+        })
+        .populate("createdBy");
     } else {
       quotes = await Quote.find({ createdBy: userId })
         .populate("travellers", "name email") // Populate traveller's name and email
@@ -119,13 +120,14 @@ exports.getQuoteByTripId = async (req, res) => {
     }
 
     // Fetch the quote by tripId from the database
-    const quote = await Quote.findOne({ tripId }).populate("travellers", "name email") // Populate traveller's name and email
-    .populate("destination")
-    .populate({
-      path: "comments.author", // Populate author field within comments
-      select: "name email", // Only retrieve name and email from the User model
-    })
-    .populate("createdBy");
+    const quote = await Quote.findOne({ tripId })
+      .populate("travellers", "name userType email") // Populate traveller's name and email
+      .populate("destination")
+      .populate({
+        path: "comments.author", // Populate author field within comments
+        select: "name email", // Only retrieve name and email from the User model
+      })
+      .populate("createdBy");
 
     // If no quote is found, return a 404 response
     if (!quote) {
@@ -272,8 +274,7 @@ exports.createIntenerary = async (req, res) => {
   }
 };
 
-
-exports.editquote =async (req, res) => {
+exports.editquote = async (req, res) => {
   const { quoteid } = req.params;
   const updateData = req.body;
 
@@ -289,8 +290,12 @@ exports.editquote =async (req, res) => {
       return res.status(404).json({ message: "Quote not found" });
     }
 
-    res.status(200).json({ message: "Quote updated successfully", updatedQuote });
+    res
+      .status(200)
+      .json({ message: "Quote updated successfully", updatedQuote });
   } catch (error) {
-    res.status(400).json({ message: "Error updating quote", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Error updating quote", error: error.message });
   }
 };

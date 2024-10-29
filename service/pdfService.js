@@ -4,7 +4,7 @@ const path = require("path");
 
 const fs = require("fs");
 
-const { LakeFormation } = require("aws-sdk");
+// const { LakeFormation } = require("aws-sdk");
 
 // Helper function to fetch image data from a URL
 async function fetchImage(url) {
@@ -299,7 +299,7 @@ async function generatePDF(
     // Add the new fields below the horizontal line
     const startDate2 = `Start Date : ${startDate}`; // Example start date
     const endDate = "End Date: 2024-10-06"; // Example end date
-    const destination = "Destination: Paris"; // Example destination
+    const destination = `Destination: ${destinationOnly.title}`; // Example destination
 
     // Set font for the new fields
     doc.font("Times-Roman").fontSize(14).fillColor("black");
@@ -661,7 +661,11 @@ async function generatePDF(
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
       .fillColor("#ff9c00")
-      .text(infoText, InfoXPosition + hotelTextWidth, hotelYPosition - 14);
+      .text(
+        infoText,
+        InfoXPosition + hotelTextWidth - 105,
+        hotelYPosition - 14
+      );
 
     // Add space after the heading
     let hotelCardYPosition = hotelYPosition + 60;
