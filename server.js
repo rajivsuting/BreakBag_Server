@@ -48,7 +48,12 @@ app.use("/api/agent", userRoutes);
 app.use("/api/pdf", pdfRoutes);
 
 app.get("/hotels", async (req, res) => {
-  const { location, radius = 5000, type = "lodging", name } = req.query;
+  const {
+    location,
+    radius = 5000,
+    type = "lodging",
+    name = "Hotel Nakshatra",
+  } = req.query;
   console.log(location, radius, type, name);
 
   // Use `name` from the query parameter (sent from client) and default to "hotel" if not provided
