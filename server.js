@@ -15,6 +15,7 @@ const pdfRoutes = require("./routes/pdfRoutes");
 const userRoutes = require("./routes/userRoutes");
 const logger = require("./config/logger");
 const connectDB = require("./db/connectDB");
+const Fuse = require("fuse.js");
 
 const cookieParser = require("cookie-parser");
 const { protect } = require("./middleware/authMiddleware");
@@ -47,30 +48,28 @@ app.use("/api/quote", quoteRoutes);
 app.use("/api/agent", userRoutes);
 app.use("/api/pdf", pdfRoutes);
 
-app.get("/hotels", async (req, res) => {
-  const {
-    location,
-    radius = 5000,
-    type = "lodging",
-    name = "Hotel Nakshatra",
-  } = req.query;
-  console.log(location, radius, type, name);
+// Route to search for a hotel by name
+app.get("/search-hotel", async (req, res) => {
+  const { hotelName } = req.query;
 
-  // Use `name` from the query parameter (sent from client) and default to "hotel" if not provided
-  const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
-    name || "hotel"
-  )}+in+${location}&radius=${radius}&type=${type}&key=${
-    process.env.GOOGLE_API_KEY
-  }`;
+  if (!hotelName) {
+    return res.status(400).json({ error: "Hotel name is required" });
+  }
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
-    res.json(data.results);
+    // Google Places API URL
+    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(
+      hotelName
+    )}&type=lodging&key=${process.env.GOOGLE_API_KEY}`;
+
+    // Fetch data from Google Places API
+    const response = await axios.get(url);
+
+    // Send back the hotel data
+    res.status(200).json(response.data);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Error fetching data from Google Places API" });
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch hotel data" });
   }
 });
 
