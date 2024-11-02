@@ -19,6 +19,7 @@ const connectDB = require("./db/connectDB");
 
 const cookieParser = require("cookie-parser");
 const { protect } = require("./middleware/authMiddleware");
+const { default: axios } = require("axios");
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
