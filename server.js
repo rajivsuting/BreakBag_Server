@@ -66,7 +66,7 @@ app.get("/search-hotel", async (req, res) => {
     // Fetch data from Google Places API
     const response = await axios.get(url);
 
-    // Send back the hotel data
+    // Send back the hotel data 
     res.status(200).json(response.data.results);
   } catch (error) {
     console.error(error);
