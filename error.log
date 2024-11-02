@@ -31,3 +31,7 @@
 2024-10-20T18:41:23.369Z error: Error fetching travel summaries: getaddrinfo ENOTFOUND ac-56l3hcs-shard-00-00.cw776ef.mongodb.net
 2024-10-22T07:38:55.575Z error: Error fetching travel summaries: getaddrinfo ENOTFOUND ac-56l3hcs-shard-00-00.cw776ef.mongodb.net
 2024-10-24T11:01:18.675Z error: Error fetching travel summaries: getaddrinfo ENOTFOUND ac-56l3hcs-shard-00-00.cw776ef.mongodb.net
+2024-11-02T19:36:14.937Z error: Error creating traveller
+2024-11-02T19:36:15.845Z error: Error creating traveller
+2024-11-02T19:36:20.949Z error: Error creating traveller
+2024-11-02T19:36:22.483Z error: Error creating traveller
