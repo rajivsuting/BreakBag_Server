@@ -62,12 +62,10 @@ app.get("/search-hotel", async (req, res) => {
       hotelName
     )}&type=lodging&region=us&key=${process.env.GOOGLE_API_KEY}`;
 
-    const response = await axios.get(url, {
-      headers: {
-        "Accept-Language": "en-US",
-      },
-    });
+    // Fetch data from Google Places API
+    const response = await axios.get(url);
 
+    // Send back the hotel data
     res.status(200).json(response.data.results);
   } catch (error) {
     console.error(error);
