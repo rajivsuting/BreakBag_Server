@@ -67,7 +67,7 @@ app.get("/search-hotel", async (req, res) => {
     const response = await axios.get(url);
 
     // Send back the hotel data
-    res.status(200).json(response.data);
+    res.status(200).json(response.data.results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch hotel data" });
