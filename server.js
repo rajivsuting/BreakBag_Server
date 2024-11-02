@@ -15,7 +15,7 @@ const pdfRoutes = require("./routes/pdfRoutes");
 const userRoutes = require("./routes/userRoutes");
 const logger = require("./config/logger");
 const connectDB = require("./db/connectDB");
-const Fuse = require("fuse.js");
+// const Fuse = require("fuse.js");
 
 const cookieParser = require("cookie-parser");
 const { protect } = require("./middleware/authMiddleware");
