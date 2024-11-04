@@ -29,7 +29,20 @@ exports.createExclusion = async (req, res) => {
 
 exports.getAllExclusions = async (req, res) => {
   try {
-    const exclusions = await Exclusion.find();
+    // Extract page and limit from query parameters
+    const { page = 1, limit } = req.query;
+
+    // Convert page and limit to integers
+    const pageNum = parseInt(page, 10);
+    const limitNum = limit ? parseInt(limit, 10) : undefined; // If limit is not provided, it will be undefined
+
+    // Calculate the skip value
+    const skip = (pageNum - 1) * (limitNum || 1); // Use limitNum or default to 1
+
+    // Fetch exclusions from the database with optional pagination
+    const exclusions = await Exclusion.find()
+      .skip(skip)
+      .limit(limitNum || 0); // If limitNum is not provided, it will return all documents
 
     if (exclusions.length === 0) {
       return res.status(404).json({ message: "No exclusions found." });
@@ -42,9 +55,10 @@ exports.getAllExclusions = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching exclusions:", err);
-    return res
-      .status(500)
-      .json({ message: "Error fetching exclusions", error: err.message });
+    return res.status(500).json({
+      message: "Error fetching exclusions",
+      error: err.message,
+    });
   }
 };
 

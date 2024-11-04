@@ -30,24 +30,45 @@ exports.createTravelSummary = async (req, res) => {
 
 // Get all Travel Summaries with Pagination
 exports.getAllTravelSummary = async (req, res) => {
-  // const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit } = req.query; // Extract pagination parameters
 
   try {
-    const travelSummaries = await TravelSummary.find().lean(); // Performance optimization
-    // .skip((page - 1) * limit)
-    // .limit(parseInt(limit));
+    // Convert page and limit to integers
+    const pageNum = parseInt(page, 10);
+    const limitNum = limit ? parseInt(limit, 10) : undefined; // If limit is not provided, it will be undefined
 
-    // const total = await TravelSummary.countDocuments();
+    // Calculate the skip value
+    const skip = (pageNum - 1) * (limitNum || 1); // Use limitNum or default to 1
+
+    // Fetch travel summaries from the database with optional pagination
+    const travelSummaries = await TravelSummary.find()
+      .skip(skip)
+      .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
+      .lean(); // Performance optimization: returns plain JS objects
+
+    // Get the total number of travel summaries
+    const total = await TravelSummary.countDocuments();
+
+    // Check if any travel summaries were found
+    if (travelSummaries.length === 0) {
+      return res.status(404).json({ message: "No travel summaries found." });
+    }
 
     res.status(200).json({
+      status: "success",
       travelSummaries,
-      // currentPage: page,
-      // totalPages: Math.ceil(total / limit),
-      // totalSummaries: total,
+      currentPage: pageNum,
+      totalPages: Math.ceil(total / (limitNum || 1)), // Calculate total pages based on the limit
+      totalSummaries: total,
     });
   } catch (error) {
-    logger.error(`Error fetching travel summaries: ${error.message}`);
-    res.status(500).json({ message: "Error fetching travel summaries", error });
+    console.error(`Error fetching travel summaries: ${error.message}`);
+    res
+      .status(500)
+      .json({
+        message: "Error fetching travel summaries",
+        error: error.message,
+      });
   }
 };
 

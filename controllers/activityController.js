@@ -37,8 +37,21 @@ exports.createActivity = async (req, res) => {
 // Get all activities
 exports.getAllActivity = async (req, res) => {
   try {
-    // Fetch all activities from the database
-    const activities = await Activity.find().populate("destination", "title");
+    // Extract page and limit from query parameters
+    const { page = 1, limit } = req.query;
+
+    // Convert page and limit to integers
+    const pageNum = parseInt(page, 10);
+    const limitNum = limit ? parseInt(limit, 10) : undefined; // If limit is not provided, it will be undefined
+
+    // Calculate the skip value
+    const skip = (pageNum - 1) * (limitNum || 1); // Use limitNum or default to 1
+
+    // Fetch activities from the database with optional pagination
+    const activities = await Activity.find()
+      .populate("destination", "title")
+      .skip(skip)
+      .limit(limitNum || 0); // If limitNum is not provided, it will return all documents
 
     if (activities.length === 0) {
       return res.status(404).json({ message: "No activities found" });
@@ -51,9 +64,10 @@ exports.getAllActivity = async (req, res) => {
     });
   } catch (err) {
     console.error("Error retrieving activities:", err);
-    return res
-      .status(500)
-      .json({ message: "Error retrieving activities", error: err.message });
+    return res.status(500).json({
+      message: "Error retrieving activities",
+      error: err.message,
+    });
   }
 };
 

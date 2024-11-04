@@ -44,31 +44,42 @@ exports.createTraveller = async (req, res) => {
 
 // Get all Travellers with Pagination
 exports.getTravellers = async (req, res) => {
-  // const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit } = req.query; // Extract pagination parameters
   const loggedInUser = req.user; // Assuming req.user contains user info like role and id
-  // console.log(req.user);
+
   try {
     let travellers;
     let total;
 
+    // Convert page and limit to integers
+    const pageNum = parseInt(page, 10);
+    const limitNum = limit ? parseInt(limit, 10) : undefined; // If limit is not provided, it will be undefined
+
+    // Calculate the skip value
+    const skip = (pageNum - 1) * (limitNum || 1); // Use limitNum or default to 1
+
     if (loggedInUser.role === "Admin") {
       // Admin: Can view all travellers
-      travellers = await Traveller.find().lean(); // Performance optimization: returns plain JS objects
-      // .skip((page - 1) * limit)
-      // .limit(parseInt(limit));
+      travellers = await Traveller.find()
+        .skip(skip)
+        .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
+        .lean(); // Performance optimization: returns plain JS objects
 
-      // total = await Traveller.countDocuments();
+      // Get the total number of travellers
+      total = await Traveller.countDocuments();
     } else {
       // Non-Admin: Can only view travellers assigned to them
       travellers = await Traveller.find({
         agentAssigned: loggedInUser.userId,
-      }).lean();
-      // .skip((page - 1) * limit)
-      // .limit(parseInt(limit));
+      })
+        .skip(skip)
+        .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
+        .lean();
 
-      // total = await Traveller.countDocuments({
-      //   agentAssigned: loggedInUser.userId,
-      // });
+      // Get the total number of travellers assigned to the user
+      total = await Traveller.countDocuments({
+        agentAssigned: loggedInUser.userId,
+      });
     }
 
     if (travellers.length === 0) {
@@ -78,16 +89,16 @@ exports.getTravellers = async (req, res) => {
     res.status(200).json({
       status: "success",
       travellers,
-      // currentPage: parseInt(page),
-      // totalPages: Math.ceil(total / limit),
-      // totalTravellers: total,
+      currentPage: pageNum,
+      totalPages: Math.ceil(total / (limitNum || 1)), // Calculate total pages based on the limit
+      totalTravellers: total,
     });
   } catch (error) {
-    logger.error(`Error fetching travellers: ${error.message}`);
+    console.error(`Error fetching travellers: ${error.message}`);
     res.status(500).json({
       status: "error",
       message: "Error fetching travellers",
-      error,
+      error: error.message,
     });
   }
 };
