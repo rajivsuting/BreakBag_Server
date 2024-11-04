@@ -87,7 +87,7 @@ exports.searchActivityByKeyword = async (req, res) => {
     // Search for activity where title or description matches the regex
     const results = await Activity.find({
       $or: [{ title: { $regex: regex } }, { description: { $regex: regex } }],
-    });
+    }).populate("destination", "title");
 
     // Check if results were found
     if (!results || results.length === 0) {
