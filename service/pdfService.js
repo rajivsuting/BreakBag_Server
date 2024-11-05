@@ -781,15 +781,15 @@ async function generatePDF(
         );
       dayCount++;
 
-      // Set initial Y position
+    
       let currentY = padding + 100;
 
       // Define new dimensions for the rectangles and images
       const largeImageWidth = doc.page.width * 0.7 - 2 * padding;
-      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50; // Increased right sidebar width by 20
-      const adjustedHeight = 320; // Reduced height by 20 pixels
+      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50; 
+      const adjustedHeight = 230;
       const largeImageHeight = adjustedHeight;
-      const sidebarImageHeight = adjustedHeight / 2.1; // Each sidebar rectangle is half the large image height
+      const sidebarImageHeight = adjustedHeight / 2.1; 
       const gap = 10;
 
       // Draw a large rectangle for the left image
@@ -817,7 +817,7 @@ async function generatePDF(
       const largeImageData = await fetchImage(largeImageUrl);
       doc.image(largeImageData, padding, currentY, {
         width: largeImageWidth,
-        height: largeImageHeight, // Fit image to fill the large rectangle
+        height: largeImageHeight, 
       });
 
       if (item.images[1]) {
@@ -825,7 +825,7 @@ async function generatePDF(
         const sidebarImage1Data = await fetchImage(sidebarImage1Url);
         doc.image(sidebarImage1Data, sidebarXPosition, currentY, {
           width: sidebarWidth,
-          height: sidebarImageHeight, // Fit image to fill the first sidebar rectangle
+          height: sidebarImageHeight, 
         });
       }
 
@@ -838,7 +838,7 @@ async function generatePDF(
           currentY + sidebarImageHeight + gap,
           {
             width: sidebarWidth,
-            height: sidebarImageHeight, // Fit image to fill the second sidebar rectangle
+            height: sidebarImageHeight, 
           }
         );
       }
@@ -908,42 +908,42 @@ async function generatePDF(
     const inclusionsHeadingXPosition = 0;
 
     // Print "TRIP" with a regular bold font
-    const TRIPYPosition = 70; // Adjust the Y position as needed
+    const TRIPYPosition = 70; 
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") // Set the color for "TRIP"
+      .fillColor("#053260") 
       .text(TRIPText, inclusionsHeadingXPosition + 30, TRIPYPosition, {
-        continued: true, // To print "inclusions" on the same line
+        continued: true, 
       });
 
     // Print "inclusions" with Sacramento font
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#ff9c00") // Set the color for "inclusions"
+      .fillColor("#ff9c00") 
       .text(
         inclusionsText,
         inclusionsHeadingXPosition + TRIPTextWidth - 54,
         TRIPYPosition - 15
-      ); // Adjusted to start from the left
+      ); 
 
     // Draw a horizontal line below the heading
-    const inclusionsLineYPosition = TRIPYPosition + 35; // Adjust the Y position below the text
+    const inclusionsLineYPosition = TRIPYPosition + 35; 
 
     // Increase the length of the line by 50 units
     const lineLengthIncrease = 50;
     doc
-      .moveTo(inclusionsHeadingXPosition - 25, inclusionsLineYPosition) // Start point of the line (moved left by 25)
+      .moveTo(inclusionsHeadingXPosition - 25, inclusionsLineYPosition) 
       .lineTo(
-        inclusionsHeadingXPosition + totalinclusionsHeadingWidth + 25, // End point of the line (moved right by 25)
+        inclusionsHeadingXPosition + totalinclusionsHeadingWidth + 25, 
         inclusionsLineYPosition
       ) // Keep the Y position the same
-      .lineWidth(1) // Set the thickness of the line
-      .strokeColor("#000000") // Set the color of the line (black in this case)
-      .stroke(); // Draw the line
+      .lineWidth(1) 
+      .strokeColor("#000000") 
+      .stroke(); 
 
-    let inclusionY = 150; // Initial Y position for inclusion data
+    let inclusionY = 150; 
 
     // Iterate through each item in the inclusionData.itemList
     for (let i = 0; i < inclusionData.itemList.length; i++) {
@@ -956,12 +956,12 @@ async function generatePDF(
       doc
         .font("Times-Bold")
         .fontSize(24)
-        .fillColor(titleColor) // Set color based on index
+        .fillColor(titleColor) 
         .text(`${item.title} :`, padding + 7, inclusionY, {
           align: "left",
         });
 
-      inclusionY = doc.y + 10; // Update Y position after title
+      inclusionY = doc.y + 10; 
 
       // Print the description in bullet points
       for (const desc of item.description) {
@@ -974,10 +974,10 @@ async function generatePDF(
             width: doc.page.width - 2 * padding,
           });
 
-        inclusionY = doc.y + 5; // Update Y position after each bullet point
+        inclusionY = doc.y + 5; 
       }
 
-      inclusionY = doc.y + 15; // Add some space before the next item
+      inclusionY = doc.y + 15;
     }
 
     // -----------------------------Transfers---------------------------
@@ -1010,42 +1010,42 @@ async function generatePDF(
     const transfersHeadingXPosition = 0;
 
     // Define Y position for the heading
-    const TRANSFERSYPosition = 70; // Adjust the Y position as needed
+    const TRANSFERSYPosition = 70;
 
     // Print "TRANSFERS" with a regular bold font
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") // Set the color for "TRANSFERS"
+      .fillColor("#053260") 
       .text(TRANSFERSText, transfersHeadingXPosition + 30, TRANSFERSYPosition, {
-        continued: true, // To print "Process" on the same line
+        continued: true,
       });
 
     // Print "Process" with Sacramento font
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#ff9c00") // Set the color for "Process"
+      .fillColor("#ff9c00") 
       .text(
         transfersProcessText,
-        transfersHeadingXPosition + TRANSFERSTextWidth - 140, // Adjust X position
-        TRANSFERSYPosition - 15 // Adjust Y position
+        transfersHeadingXPosition + TRANSFERSTextWidth - 140,
+        TRANSFERSYPosition - 15
       );
 
     // Draw a horizontal line below the heading
-    const transfersLineYPosition = TRANSFERSYPosition + 35; // Adjust the Y position below the text
+    const transfersLineYPosition = TRANSFERSYPosition + 35;
     doc
-      .moveTo(transfersHeadingXPosition - 40, transfersLineYPosition) // Start point of the line
+      .moveTo(transfersHeadingXPosition - 40, transfersLineYPosition) 
       .lineTo(
-        transfersHeadingXPosition + totalTransfersHeadingWidth + 40, // End point of the line
+        transfersHeadingXPosition + totalTransfersHeadingWidth + 40,
         transfersLineYPosition
-      ) // Keep the Y position the same
-      .lineWidth(1) // Set the thickness of the line
-      .strokeColor("#000000") // Set the color of the line (black in this case)
-      .stroke(); // Draw the line
+      ) 
+      .lineWidth(1) 
+      .strokeColor("#000000") 
+      .stroke(); 
 
     // Set the starting Y position for the bullet points
-    let bulletPointYPositionForTransfers = transfersLineYPosition + 35; // Adjust as needed
+    let bulletPointYPositionForTransfers = transfersLineYPosition + 35;
 
     // Define maximum width for the text wrapping (you can adjust this based on your layout)
     const maxWidthForTransfers = 500;
@@ -1059,17 +1059,17 @@ async function generatePDF(
 
       // Set the font size and color for bullet points
       doc
-        .font("Times-Roman") // Change font as needed
-        .fontSize(14) // Set font size to 14
-        .fillColor("#000000"); // Set the color for the text
+        .font("Times-Roman") 
+        .fontSize(14) 
+        .fillColor("#000000"); 
 
       // Print the bullet point first
       doc.text(bulletPoint, 35, bulletPointYPositionForTransfers);
 
       // Print the description next to the bullet point with automatic text wrapping
       doc.text(item, 45, bulletPointYPositionForTransfers, {
-        width: maxWidthForTransfers, // Set max width for text wrapping
-        lineGap: 5, // Set line height between lines of text
+        width: maxWidthForTransfers, 
+        lineGap: 5, 
       });
 
       // Calculate the height of the wrapped text
@@ -1078,7 +1078,7 @@ async function generatePDF(
       });
 
       // Increment the Y position for the next bullet point, based on the height of the current item
-      bulletPointYPositionForTransfers += itemHeight + 19; // Add spacing between items
+      bulletPointYPositionForTransfers += itemHeight + 19; 
     });
 
     // ------------------------Exclusions----------------------------
@@ -1105,12 +1105,11 @@ async function generatePDF(
     // Set X position to start from the left side of the page
     const exclusionsHeadingXPosition = 0;
 
-    // Print "TRIP" with a regular bold font
-    // Adjust the Y position as needed
+
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") // Set the color for "TRIP"
+      .fillColor("#053260") 
       .text(TRIPText, exclusionsHeadingXPosition + 30, TRIPYPosition, {
         continued: true, // To print "exclusions" on the same line
       });

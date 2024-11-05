@@ -199,3 +199,36 @@ exports.assignTravellerToAgent = async (req, res) => {
     });
   }
 };
+
+exports.searchTravellerByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+
+    // Validate that a name is provided
+    if (!name) {
+      return res.status(400).json({ message: "Name is required for search." });
+    }
+
+    // Perform a case-insensitive search with partial matching
+    const regex = new RegExp(name, "i"); // 'i' flag makes it case-insensitive
+    const travellers = await Traveller.find({ name: { $regex: regex } });
+
+    // Check if any travellers were found
+    if (travellers.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No travellers found with the given name." });
+    }
+
+    // Return the found travellers
+    return res.status(200).json({
+      message: "Travellers found successfully.",
+      data: travellers,
+    });
+  } catch (err) {
+    console.error("Error searching for traveller:", err);
+    return res
+      .status(500)
+      .json({ message: "Error searching for traveller", error: err.message });
+  }
+};

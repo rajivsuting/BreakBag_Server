@@ -34,3 +34,9 @@ userSchema.pre("save", function (next) {
 });
 
 module.exports = mongoose.model("User", userSchema);
+
+/*destination- search by title
+travellers-  search by name
+agents - pagination + search by name
+transfer - correct search
+*/

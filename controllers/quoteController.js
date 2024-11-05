@@ -5,9 +5,7 @@ exports.createQuote = async (req, res) => {
   try {
     const { travellers, destination, startDate, endDate } = req.body;
     const { userId } = req.user;
-    // console.log("post",req.user)
 
-    // Validate required fields
     if (!travellers || travellers.length === 0) {
       return res
         .status(400)
@@ -23,37 +21,31 @@ exports.createQuote = async (req, res) => {
       return res.status(400).json({ message: "End date is required." });
     }
 
-    // Parse the start and end dates correctly
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    // Ensure valid date objects
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({ message: "Invalid date format." });
     }
 
-    // Ensure the end date is after or the same as the start date
-    if (end <= start) {
-      return res
-        .status(400)
-        .json({ message: "End date must be after the start date." });
+    if (end < start) {
+      return res.status(400).json({
+        message: "End date must be after or equal to the start date.",
+      });
     }
 
-    // Calculate duration in days (excluding the end date)
-    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)); // Duration in days (excluding end date)
+    const duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
-    // Create a new quote record in the database
     const newQuote = await Quote.create({
       travellers,
       destination,
-      numberOfTravellers: travellers.length, // Set number of travellers dynamically
+      numberOfTravellers: travellers.length,
       startDate,
       endDate,
-      duration, // Calculated duration in days
+      duration,
       createdBy: userId,
     });
 
-    // Send a success response
     return res.status(201).json({
       message: "Quote created successfully",
       data: newQuote,
@@ -121,22 +113,20 @@ exports.getQuoteByTripId = async (req, res) => {
 
     // Fetch the quote by tripId from the database
     const quote = await Quote.findOne({ tripId })
-      .populate("travellers", "name userType email") // Populate traveller's name and email
+      .populate("travellers", "name userType email")
       .populate("destination")
       .populate({
-        path: "comments.author", // Populate author field within comments
-        select: "name email", // Only retrieve name and email from the User model
+        path: "comments.author",
+        select: "name email",
       })
       .populate("createdBy");
 
-    // If no quote is found, return a 404 response
     if (!quote) {
       return res
         .status(404)
         .json({ message: `No quote found for Trip ID: ${tripId}` });
     }
 
-    // Send a success response with the quote data
     return res.status(200).json({
       message: "Quote retrieved successfully",
       data: quote,
@@ -153,10 +143,9 @@ exports.getQuoteByTripId = async (req, res) => {
 exports.createCommentOnQuote = async (req, res) => {
   try {
     const { quoteId } = req.params;
-    const { comment } = req.body; // Assume this contains the comment content
-    const { userId } = req.user; // The logged-in user's ID
+    const { comment } = req.body;
+    const { userId } = req.user;
 
-    // Validate if quoteId is provided
     if (!quoteId) {
       return res.status(400).json({ message: "Quote ID is required." });
     }
@@ -165,7 +154,6 @@ exports.createCommentOnQuote = async (req, res) => {
       return res.status(400).json({ message: "Comment is required." });
     }
 
-    // Fetch the quote by quoteId from the database
     const quote = await Quote.findById(quoteId);
     if (!quote) {
       return res
@@ -173,17 +161,15 @@ exports.createCommentOnQuote = async (req, res) => {
         .json({ message: `No quote found for Quote ID: ${quoteId}` });
     }
 
-    // Add the comment to the quote's comments array
     const newComment = {
-      content: comment, // Ensure this is the comment content
-      author: userId, // Reference to the user making the comment
-      createdAt: new Date(), // Date will default to `Date.now` in the schema, so you could omit this
+      content: comment,
+      author: userId,
+      createdAt: new Date(),
     };
 
     quote.comments.push(newComment);
     await quote.save();
 
-    // Send a success response with the updated quote data
     return res.status(200).json({
       message: "Comment created successfully",
       data: quote,
@@ -218,16 +204,16 @@ exports.createIntenerary = async (req, res) => {
       name: hotel.name,
       checkInDate: hotel.checkInDate,
       checkOutDate: hotel.checkOutDate,
-      location: hotel.vicinity, // using 'vicinity' as 'location'
+      location: hotel.vicinity,
       mealPlan: hotel.mealPlan,
-      numberOfGuest: parseInt(hotel.numberOfGuest), // converting to number
+      numberOfGuest: parseInt(hotel.numberOfGuest),
       roomType: hotel.roomType,
     }));
 
     const detailedItineraryData = activityPerDay.map((activity) => ({
       title: activity.summaryDetails.title,
       description: activity.summaryDetails.description,
-      images: activity.summaryDetails.images, // No default images needed
+      images: activity.summaryDetails.images,
     }));
 
     const otherInfoData = selectedOtherInformation.map(
@@ -244,11 +230,11 @@ exports.createIntenerary = async (req, res) => {
 
     const inclusionData = {
       itemList: selectedInclusions.map((inclusion) => {
-        let descriptionArray = [inclusion.description]; // Convert description into array
+        let descriptionArray = [inclusion.description];
 
         return {
-          title: inclusion.title, // Map title as is
-          description: descriptionArray, // Add description inside an array
+          title: inclusion.title,
+          description: descriptionArray,
         };
       }),
     };
@@ -279,11 +265,10 @@ exports.editquote = async (req, res) => {
   const updateData = req.body;
 
   try {
-    // Find the document by ID and update it
     const updatedQuote = await Quote.findByIdAndUpdate(
       quoteid,
-      { $set: updateData }, // Only updates the fields provided in the request body
-      { new: true, runValidators: true } // Returns the updated document and runs schema validators
+      { $set: updateData },
+      { new: true, runValidators: true }
     );
 
     if (!updatedQuote) {

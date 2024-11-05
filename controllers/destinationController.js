@@ -67,3 +67,32 @@ exports.getAllDestinations = async (req, res) => {
     });
   }
 };
+
+exports.searchDestinationByTitle = async (req, res) => {
+  try {
+    const { title } = req.query;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required for search." });
+    }
+
+    const regex = new RegExp(title, "i");
+    const destinations = await Destination.find({ title: { $regex: regex } });
+
+    if (destinations.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No destinations found with the given title." });
+    }
+
+    return res.status(200).json({
+      message: "Destinations found successfully.",
+      data: destinations,
+    });
+  } catch (err) {
+    console.error("Error searching for destination:", err);
+    return res
+      .status(500)
+      .json({ message: "Error searching for destination", error: err.message });
+  }
+};
