@@ -193,6 +193,7 @@ exports.createIntenerary = async (req, res) => {
     selectedInclusions,
     activityPerDay,
     destinationOnly,
+    quote,
   } = req.body;
   try {
     const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
@@ -204,7 +205,7 @@ exports.createIntenerary = async (req, res) => {
       name: hotel.name,
       checkInDate: hotel.checkInDate,
       checkOutDate: hotel.checkOutDate,
-      location: hotel.vicinity,
+      location: hotel.formatted_address,
       mealPlan: hotel.mealPlan,
       numberOfGuest: parseInt(hotel.numberOfGuest),
       roomType: hotel.roomType,
@@ -238,6 +239,12 @@ exports.createIntenerary = async (req, res) => {
         };
       }),
     };
+
+    const exist = await Quote.findById(quote._id);
+
+    exist.itenerary = req.body;
+
+    await exist.save();
 
     await generatePDF(
       res,

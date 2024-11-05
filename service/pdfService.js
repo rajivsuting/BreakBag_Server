@@ -1,6 +1,7 @@
 const PDFDocument = require("pdfkit");
 const axios = require("axios");
 const path = require("path");
+const { PDFDocument: PDFLibDocument } = require("pdf-lib");
 
 const fs = require("fs");
 
@@ -38,29 +39,11 @@ async function generatePDF(
     const doc = new PDFDocument({ size: "A4" });
 
     // Set the response headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=BreakBagItenerary.pdf"
-    );
-
-    // Pipe the PDF into the response
-    doc.pipe(res);
 
     // Define padding on all sides
     const padding = 30;
 
     // --- First Page ---
-
-    // Fetch the logo image from the URL
-    // const logoUrl =
-    //   "https://breakbag.com/static/media/logo.3fff3126fefbf4f3afe7.png";
-    // const logoImage = await fetchImage(logoUrl);
-
-    // // Add the logo to the top right of the first page
-    // doc.image(logoImage, doc.page.width - padding - 100, padding, {
-    //   fit: [100, 100],
-    // });
 
     const logoImage = path.join(__dirname, "..", "images", "logo.png"); // Adjust path as needed
     const imagePath = await fetchImage(destinationOnly?.image);
@@ -652,7 +635,7 @@ async function generatePDF(
       .font("Times-Bold")
       .fontSize(32)
       .fillColor("#053260")
-      .text(hotelText, InfoXPosition, hotelYPosition, {
+      .text(hotelText, InfoXPosition, hotelYPosition + 10, {
         continued: true,
       });
 
@@ -661,11 +644,7 @@ async function generatePDF(
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
       .fillColor("#ff9c00")
-      .text(
-        infoText,
-        InfoXPosition + hotelTextWidth - 105,
-        hotelYPosition - 14
-      );
+      .text(infoText, InfoXPosition + hotelTextWidth - 105, hotelYPosition - 5);
 
     // Add space after the heading
     let hotelCardYPosition = hotelYPosition + 60;
@@ -699,43 +678,42 @@ async function generatePDF(
       const textXPosition = cardXPosition + cardPadding - 5;
 
       // Add hotel name at the top of the card (center-aligned)
-      doc
-        .font("Times-Bold")
-        .fontSize(16)
-        .fillColor("#053260")
-        .text(hotel.name, textXPosition, hotelCardYPosition + 10, {
-          width: cardWidth - 2 * cardPadding,
-          align: "center",
-        });
+      doc.font("Times-Bold").fontSize(16).fillColor("#053260");
+
+      // Calculate the height of the hotel name text
+      const hotelNameHeight = doc.heightOfString(hotel.name, {
+        width: cardWidth - 2 * cardPadding,
+        align: "center",
+      });
+
+      // Render the hotel name text
+      doc.text(hotel.name, textXPosition, hotelCardYPosition + 10, {
+        width: cardWidth - 2 * cardPadding,
+        align: "center",
+      });
+
+      // Position for details below the hotel name with reduced spacing
+      const detailsYPosition = hotelCardYPosition + hotelNameHeight + 5;
 
       // Add check-in, check-out, and other details
       const hotelDetails = `
-      Check-In: ${hotel.checkInDate}
-      Check-Out: ${hotel.checkOutDate}
-      Location: ${hotel.location}
-      Meal Plan: ${hotel.mealPlan}
-      Guests: ${hotel.numberOfGuest}
-      Room: ${hotel.roomType}
+        Check-In: ${hotel.checkInDate}
+        Check-Out: ${hotel.checkOutDate}
+        Location: ${hotel.location}
+        Meal Plan: ${hotel.mealPlan}
+        Guests: ${hotel.numberOfGuest}
+        Room: ${hotel.roomType}
       `;
 
       doc
         .font("Times-Roman")
         .fontSize(12)
         .fillColor("#000000")
-        .text(hotelDetails, textXPosition, hotelCardYPosition + 40, {
+        .text(hotelDetails, textXPosition, detailsYPosition, {
           width: cardWidth - 2 * cardPadding,
           align: "center",
           lineGap: 3,
         });
-
-      // Divider line between cards
-      if (!isLeftColumn) {
-        hotelCardYPosition += cardHeight + 30;
-        doc
-          .moveTo(40, hotelCardYPosition - 10)
-          .lineTo(doc.page.width - 40, hotelCardYPosition - 10)
-          .stroke("#cccccc");
-      }
 
       // Alternate columns for the next card
       isLeftColumn = !isLeftColumn;
@@ -781,15 +759,14 @@ async function generatePDF(
         );
       dayCount++;
 
-    
       let currentY = padding + 100;
 
       // Define new dimensions for the rectangles and images
       const largeImageWidth = doc.page.width * 0.7 - 2 * padding;
-      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50; 
+      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50;
       const adjustedHeight = 230;
       const largeImageHeight = adjustedHeight;
-      const sidebarImageHeight = adjustedHeight / 2.1; 
+      const sidebarImageHeight = adjustedHeight / 2.1;
       const gap = 10;
 
       // Draw a large rectangle for the left image
@@ -817,7 +794,7 @@ async function generatePDF(
       const largeImageData = await fetchImage(largeImageUrl);
       doc.image(largeImageData, padding, currentY, {
         width: largeImageWidth,
-        height: largeImageHeight, 
+        height: largeImageHeight,
       });
 
       if (item.images[1]) {
@@ -825,7 +802,7 @@ async function generatePDF(
         const sidebarImage1Data = await fetchImage(sidebarImage1Url);
         doc.image(sidebarImage1Data, sidebarXPosition, currentY, {
           width: sidebarWidth,
-          height: sidebarImageHeight, 
+          height: sidebarImageHeight,
         });
       }
 
@@ -838,25 +815,29 @@ async function generatePDF(
           currentY + sidebarImageHeight + gap,
           {
             width: sidebarWidth,
-            height: sidebarImageHeight, 
+            height: sidebarImageHeight,
           }
         );
       }
 
       // Update currentY to start text below the images without overlapping
-      currentY += largeImageHeight + 20;
+      currentY += largeImageHeight + 40;
 
       // Add the title below the images
-      doc
-        .font("Times-Bold")
-        .fontSize(24)
-        .fillColor("#053260")
-        .text(item.title, padding, currentY, {
-          align: "left",
-          width: doc.page.width - 2 * padding,
-        });
+      doc.font("Times-Bold").fontSize(24).fillColor("#053260");
 
-      currentY += 35;
+      // Calculate the height of the title
+      const titleHeight = doc.heightOfString(item.title, {
+        width: doc.page.width - 2 * padding,
+        align: "left",
+      });
+
+      // Render the title text and update currentY to avoid overlap with the description
+      doc.text(item.title, padding, currentY, {
+        align: "left",
+        width: doc.page.width - 2 * padding,
+      });
+      currentY += titleHeight + 10; // Adding 10 pixels of space after the title
 
       // Define maximum width for text and indentation
       const maxWidth = doc.page.width - 2 * padding - 20;
@@ -908,42 +889,42 @@ async function generatePDF(
     const inclusionsHeadingXPosition = 0;
 
     // Print "TRIP" with a regular bold font
-    const TRIPYPosition = 70; 
+    const TRIPYPosition = 70;
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") 
+      .fillColor("#053260")
       .text(TRIPText, inclusionsHeadingXPosition + 30, TRIPYPosition, {
-        continued: true, 
+        continued: true,
       });
 
     // Print "inclusions" with Sacramento font
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#ff9c00") 
+      .fillColor("#ff9c00")
       .text(
         inclusionsText,
         inclusionsHeadingXPosition + TRIPTextWidth - 54,
         TRIPYPosition - 15
-      ); 
+      );
 
     // Draw a horizontal line below the heading
-    const inclusionsLineYPosition = TRIPYPosition + 35; 
+    const inclusionsLineYPosition = TRIPYPosition + 35;
 
     // Increase the length of the line by 50 units
     const lineLengthIncrease = 50;
     doc
-      .moveTo(inclusionsHeadingXPosition - 25, inclusionsLineYPosition) 
+      .moveTo(inclusionsHeadingXPosition - 25, inclusionsLineYPosition)
       .lineTo(
-        inclusionsHeadingXPosition + totalinclusionsHeadingWidth + 25, 
+        inclusionsHeadingXPosition + totalinclusionsHeadingWidth + 25,
         inclusionsLineYPosition
       ) // Keep the Y position the same
-      .lineWidth(1) 
-      .strokeColor("#000000") 
-      .stroke(); 
+      .lineWidth(1)
+      .strokeColor("#000000")
+      .stroke();
 
-    let inclusionY = 150; 
+    let inclusionY = 150;
 
     // Iterate through each item in the inclusionData.itemList
     for (let i = 0; i < inclusionData.itemList.length; i++) {
@@ -956,12 +937,12 @@ async function generatePDF(
       doc
         .font("Times-Bold")
         .fontSize(24)
-        .fillColor(titleColor) 
+        .fillColor(titleColor)
         .text(`${item.title} :`, padding + 7, inclusionY, {
           align: "left",
         });
 
-      inclusionY = doc.y + 10; 
+      inclusionY = doc.y + 10;
 
       // Print the description in bullet points
       for (const desc of item.description) {
@@ -974,7 +955,7 @@ async function generatePDF(
             width: doc.page.width - 2 * padding,
           });
 
-        inclusionY = doc.y + 5; 
+        inclusionY = doc.y + 5;
       }
 
       inclusionY = doc.y + 15;
@@ -1016,7 +997,7 @@ async function generatePDF(
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") 
+      .fillColor("#053260")
       .text(TRANSFERSText, transfersHeadingXPosition + 30, TRANSFERSYPosition, {
         continued: true,
       });
@@ -1025,7 +1006,7 @@ async function generatePDF(
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
-      .fillColor("#ff9c00") 
+      .fillColor("#ff9c00")
       .text(
         transfersProcessText,
         transfersHeadingXPosition + TRANSFERSTextWidth - 140,
@@ -1035,14 +1016,14 @@ async function generatePDF(
     // Draw a horizontal line below the heading
     const transfersLineYPosition = TRANSFERSYPosition + 35;
     doc
-      .moveTo(transfersHeadingXPosition - 40, transfersLineYPosition) 
+      .moveTo(transfersHeadingXPosition - 40, transfersLineYPosition)
       .lineTo(
         transfersHeadingXPosition + totalTransfersHeadingWidth + 40,
         transfersLineYPosition
-      ) 
-      .lineWidth(1) 
-      .strokeColor("#000000") 
-      .stroke(); 
+      )
+      .lineWidth(1)
+      .strokeColor("#000000")
+      .stroke();
 
     // Set the starting Y position for the bullet points
     let bulletPointYPositionForTransfers = transfersLineYPosition + 35;
@@ -1058,18 +1039,15 @@ async function generatePDF(
       const bulletPoint = "• ";
 
       // Set the font size and color for bullet points
-      doc
-        .font("Times-Roman") 
-        .fontSize(14) 
-        .fillColor("#000000"); 
+      doc.font("Times-Roman").fontSize(14).fillColor("#000000");
 
       // Print the bullet point first
       doc.text(bulletPoint, 35, bulletPointYPositionForTransfers);
 
       // Print the description next to the bullet point with automatic text wrapping
       doc.text(item, 45, bulletPointYPositionForTransfers, {
-        width: maxWidthForTransfers, 
-        lineGap: 5, 
+        width: maxWidthForTransfers,
+        lineGap: 5,
       });
 
       // Calculate the height of the wrapped text
@@ -1078,7 +1056,7 @@ async function generatePDF(
       });
 
       // Increment the Y position for the next bullet point, based on the height of the current item
-      bulletPointYPositionForTransfers += itemHeight + 19; 
+      bulletPointYPositionForTransfers += itemHeight + 19;
     });
 
     // ------------------------Exclusions----------------------------
@@ -1105,11 +1083,10 @@ async function generatePDF(
     // Set X position to start from the left side of the page
     const exclusionsHeadingXPosition = 0;
 
-
     doc
       .font("Times-Bold")
       .fontSize(32)
-      .fillColor("#053260") 
+      .fillColor("#053260")
       .text(TRIPText, exclusionsHeadingXPosition + 30, TRIPYPosition, {
         continued: true, // To print "exclusions" on the same line
       });
@@ -1272,178 +1249,15 @@ async function generatePDF(
       bulletPointYPositionForOtherInfo += itemHeight + 19; // Add spacing between items
     });
 
-    // ----------------------------Payment Process --------------------------------
-
-    // Add a new page for "PAYMENT Process"
-    doc.addPage();
-
-    // Add the logo to the top right of the page (reuse the logoImage variable)
-    doc.image(logoImage, doc.page.width - padding - 100, padding, {
-      fit: [100, 100],
-    });
-
-    // Set the heading "PAYMENT" and calculate its width
-    const PAYMENTText = "PAYMENT";
-    doc.font("Times-Bold").fontSize(32);
-    const PAYMENTTextWidth = doc.widthOfString(PAYMENTText);
-
-    // Set the font for "Process" using Sacramento and calculate its width
-    const processText = "Process";
-    doc
-      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
-      .fontSize(40);
-    const processTextWidth = doc.widthOfString(processText);
-
-    // Calculate the total width of the "PAYMENT Process" text
-    const totalPaymentHeadingWidth = PAYMENTTextWidth + processTextWidth;
-
-    // Set X position to start from the left side of the page
-    const paymentHeadingXPosition = 0;
-
-    // Define Y position for the heading
-    const PAYMENTYPosition = 70; // Adjust the Y position as needed
-
-    // Print "PAYMENT" with a regular bold font
-    doc
-      .font("Times-Bold")
-      .fontSize(32)
-      .fillColor("#053260") // Set the color for "PAYMENT"
-      .text(PAYMENTText, paymentHeadingXPosition + 30, PAYMENTYPosition, {
-        continued: true, // To print "Process" on the same line
-      });
-
-    // Print "Process" with Sacramento font
-    doc
-      .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
-      .fontSize(40)
-      .fillColor("#ff9c00") // Set the color for "Process"
-      .text(
-        processText,
-        paymentHeadingXPosition + PAYMENTTextWidth - 125, // Adjust X position
-        PAYMENTYPosition - 15 // Adjust Y position
-      );
-
-    // Draw a horizontal line below the heading
-    const processLineYPosition = PAYMENTYPosition + 35; // Adjust the Y position below the text
-    doc
-      .moveTo(paymentHeadingXPosition - 40, processLineYPosition) // Start point of the line
-      .lineTo(
-        paymentHeadingXPosition + totalPaymentHeadingWidth + 40, // End point of the line
-        processLineYPosition
-      ) // Keep the Y position the same
-      .lineWidth(1) // Set the thickness of the line
-      .strokeColor("#000000") // Set the color of the line (black in this case)
-      .stroke(); // Draw the line
-
-    // Set the starting Y position for the Payment options section
-    let bulletPointYPositionForPayment = processLineYPosition + 35; // Adjust as needed
-
-    // Define the payment process description
-    const paymentDescription = "Following mode of Payment are available:";
-
-    // Increase line height by adjusting the Y position
-    const descriptionLineHeight = 25; // Adjust this value to increase spacing
-    doc
-      .font("Times-Roman")
-      .fontSize(14)
-      .fillColor("#000000")
-      .text(paymentDescription, 35, bulletPointYPositionForPayment);
-    doc.moveDown(descriptionLineHeight); // Move down by the increased line height
-
-    // Increment Y position for the next section
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    // Add the Bank Transfer section with details
-    doc
-      .font("Times-Bold")
-      .fontSize(18)
-      .fillColor("#053260") // Heading for "Bank Transfer"
-      .text("1. Bank Transfer:", 35, bulletPointYPositionForPayment);
-
-    // Increase spacing before account details
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    // Set color for subheadings
-    const subheadingColor = "#ff9c00";
-
-    // Bank Transfer Details
-    doc
-      .font("Times-Roman")
-      .fontSize(14)
-      .fillColor(subheadingColor) // Set color for subheadings
-      .text("Name:", 50, bulletPointYPositionForPayment, { continued: true });
-    doc.fillColor("#000000"); // Set color for content
-    doc.text(" BreakBag Holidays Private Limited", {
-      align: "left",
-      indent: 10,
-    });
-
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    doc
-      .fillColor(subheadingColor) // Set color for subheadings
-      .text("Account Number:", 50, bulletPointYPositionForPayment, {
-        continued: true,
-      });
-    doc.fillColor("#000000"); // Set color for content
-    doc.text(" 2413230364", { align: "left", indent: 10 });
-
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    doc
-      .fillColor(subheadingColor) // Set color for subheadings
-      .text("IFSC Code:", 50, bulletPointYPositionForPayment, {
-        continued: true,
-      });
-    doc.fillColor("#000000"); // Set color for content
-    doc.text(" KKBK0000326", { align: "left", indent: 10 });
-
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    doc
-      .fillColor(subheadingColor) // Set color for subheadings
-      .text("Account Type:", 50, bulletPointYPositionForPayment, {
-        continued: true,
-      });
-    doc.fillColor("#000000"); // Set color for content
-    doc.text(" Current", { align: "left", indent: 10 });
-
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    doc
-      .fillColor(subheadingColor) // Set color for subheadings
-      .text("Branch:", 50, bulletPointYPositionForPayment, { continued: true });
-    doc.fillColor("#000000"); // Set color for content
-    doc.text(" Kolkata, Salt Lake.", { align: "left", indent: 10 });
-
-    // Increment Y position for the next section
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    // Add the UPI Transfer section with details
-    doc
-      .font("Times-Bold")
-      .fontSize(18)
-      .fillColor("#053260") // Heading for "UPI Transfer"
-      .text("2. UPI Transfer:", 35, bulletPointYPositionForPayment);
-
-    // Increment Y position for the UPI details
-    bulletPointYPositionForPayment += descriptionLineHeight;
-
-    const upiTransferDetails = `breakbag@ybl`;
-
-    doc
-      .font("Times-Roman")
-      .fontSize(14)
-      .fillColor("#000000")
-      .text(upiTransferDetails, 50, bulletPointYPositionForPayment, {
-        lineGap: 5,
-      });
-
-    // Calculate the height of the UPI transfer details and update Y position
-    bulletPointYPositionForPayment +=
-      doc.heightOfString(upiTransferDetails) + 20;
-
     doc.end();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=BreakBagItenerary.pdf"
+    );
+
+    // Pipe the PDF into the response
+    doc.pipe(res);
   } catch (error) {
     console.error("Error generating PDF:", error);
   }

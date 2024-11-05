@@ -77,6 +77,10 @@ const quoteSchema = new Schema({
     ref: "User",
     default: null,
   },
+
+  itenerary: {
+    type: Object,
+  },
 });
 
 quoteSchema.pre("save", async function (next) {
