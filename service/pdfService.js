@@ -32,7 +32,9 @@ async function generatePDF(
   otherInfoData,
   hotelData,
   transfersProcessData,
-  destinationOnly
+  destinationOnly,
+  start_Date,
+  end_Date
 ) {
   try {
     // Create a new PDF document with A4 size
@@ -271,7 +273,7 @@ async function generatePDF(
       .stroke(); // Render the line
 
     // Define the start date and total days
-    const startDate = "2024-10-02"; // Example start date
+    const startDate = start_Date; // Example start date
     const totalDays = travelSummaryDemo.length; // Number of days from the travel summary
 
     doc
@@ -281,7 +283,7 @@ async function generatePDF(
 
     // Add the new fields below the horizontal line
     const startDate2 = `Start Date : ${startDate}`; // Example start date
-    const endDate = "End Date: 2024-10-06"; // Example end date
+    const endDate = `End Date: ${end_Date}`; // Example end date
     const destination = `Destination: ${destinationOnly.title}`; // Example destination
 
     // Set font for the new fields
@@ -1258,6 +1260,7 @@ async function generatePDF(
 
     // Pipe the PDF into the response
     doc.pipe(res);
+    // res.end(mergedPdfBytes);
   } catch (error) {
     console.error("Error generating PDF:", error);
   }

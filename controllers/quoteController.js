@@ -256,7 +256,9 @@ exports.createIntenerary = async (req, res) => {
       otherInfoData,
       hotelData,
       transfersProcessData,
-      destinationOnly
+      destinationOnly,
+      quote.startDate,
+      quote.endDate
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);
