@@ -20,4 +20,6 @@ router.get(
 
 router.get("/search", transferController.searchTransfersByKeyword);
 
+router.put("/edit/:id", transferController.editTransfer);
+
 module.exports = router;

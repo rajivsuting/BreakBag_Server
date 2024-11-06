@@ -98,3 +98,34 @@ exports.searchOtherInformationByKeyword = async (req, res) => {
     });
   }
 };
+exports.editOtherInformation = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID of the record to update from the route parameters
+    const { description, title } = req.body; // Get the updated data from the request body
+
+    // Find the OtherInformation record by ID
+    const otherInformation = await OtherInformation.findById(id);
+    if (!otherInformation) {
+      return res.status(404).json({ message: "Other information not found." });
+    }
+
+    // Update the fields with new values if provided
+    if (description) otherInformation.description = description;
+    if (title) otherInformation.title = title;
+
+    // Save the updated record to the database
+    const updatedOtherInformation = await otherInformation.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Other information updated successfully",
+      data: updatedOtherInformation,
+    });
+  } catch (err) {
+    console.error("Error updating other information:", err);
+    return res.status(500).json({
+      message: "Error updating other information",
+      error: err.message,
+    });
+  }
+};

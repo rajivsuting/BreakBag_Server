@@ -97,3 +97,34 @@ exports.searchTransfersByKeyword = async (req, res) => {
     });
   }
 };
+exports.editTransfer = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID of the transfer to update from the route parameters
+    const { description, title } = req.body; // Get the updated data from the request body
+
+    // Find the Transfer record by ID
+    const transfer = await Transfer.findById(id);
+    if (!transfer) {
+      return res.status(404).json({ message: "Transfer not found." });
+    }
+
+    // Update the fields if provided in the request body
+    if (description) transfer.description = description;
+    if (title) transfer.title = title;
+
+    // Save the updated Transfer record
+    const updatedTransfer = await transfer.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Transfer updated successfully",
+      data: updatedTransfer,
+    });
+  } catch (err) {
+    console.error("Error updating transfer:", err);
+    return res.status(500).json({
+      message: "Error updating transfer",
+      error: err.message,
+    });
+  }
+};

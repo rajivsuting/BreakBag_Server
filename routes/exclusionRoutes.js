@@ -19,5 +19,6 @@ router.get(
 );
 
 router.get("/search", exclusionController.searchExclusionsByKeyword);
+router.put("/exclusion/:id", exclusionController.editExclusion);
 
 module.exports = router;

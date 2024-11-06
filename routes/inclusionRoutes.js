@@ -20,4 +20,6 @@ router.get(
 );
 
 router.get("/search", inclusionController.searchInclusionsByKeyword);
+
+router.put("/edit/:id", inclusionController.editInclusion);
 module.exports = router;

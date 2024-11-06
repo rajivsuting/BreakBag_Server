@@ -63,12 +63,10 @@ exports.getAllTravelSummary = async (req, res) => {
     });
   } catch (error) {
     console.error(`Error fetching travel summaries: ${error.message}`);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching travel summaries",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching travel summaries",
+      error: error.message,
+    });
   }
 };
 
@@ -107,5 +105,43 @@ exports.searchTravelSummariesByKeyword = async (req, res) => {
       message: "Error retrieving travel summaries",
       error: err.message,
     });
+  }
+};
+exports.editTravelSummary = async (req, res) => {
+  const { id } = req.params; // Get the ID of the travel summary to update from the route parameters
+  const { title, description } = req.body; // Get the updated data from the request body
+
+  // Validate required fields
+  if (!title && !description) {
+    return res
+      .status(400)
+      .json({
+        message:
+          "At least one field (title or description) is required to update",
+      });
+  }
+
+  try {
+    // Find the TravelSummary record by ID
+    const travelSummary = await TravelSummary.findById(id);
+    if (!travelSummary) {
+      return res.status(404).json({ message: "Travel summary not found" });
+    }
+
+    // Update the fields if provided in the request body
+    if (title) travelSummary.title = title;
+    if (description) travelSummary.description = description;
+
+    // Save the updated record
+    await travelSummary.save();
+
+    // Send a success response
+    res.status(200).json({
+      message: "Travel summary updated successfully",
+      travelSummary,
+    });
+  } catch (error) {
+    logger.error(`Error updating travel summary: ${error.message}`);
+    res.status(500).json({ message: "Error updating travel summary", error });
   }
 };

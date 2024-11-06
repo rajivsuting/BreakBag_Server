@@ -100,3 +100,33 @@ exports.searchExclusionsByKeyword = async (req, res) => {
     });
   }
 };
+exports.editExclusion = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the exclusion ID from the route parameters
+    const { description, title } = req.body; // Get the updated fields from the request body
+
+    // Find the exclusion by ID
+    const exclusion = await Exclusion.findById(id);
+    if (!exclusion) {
+      return res.status(404).json({ message: "Exclusion not found." });
+    }
+
+    // Update the exclusion fields if provided
+    if (description) exclusion.description = description;
+    if (title) exclusion.title = title;
+
+    // Save the updated exclusion record
+    const updatedExclusion = await exclusion.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Exclusion updated successfully",
+      data: updatedExclusion,
+    });
+  } catch (err) {
+    console.error("Error updating exclusion:", err);
+    return res
+      .status(500)
+      .json({ message: "Error updating exclusion", error: err.message });
+  }
+};

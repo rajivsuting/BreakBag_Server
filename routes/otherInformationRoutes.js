@@ -23,4 +23,5 @@ router.get(
   otherInformationController.searchOtherInformationByKeyword
 );
 
+router.put("/edit/:id", otherInformationController.editOtherInformation);
 module.exports = router;

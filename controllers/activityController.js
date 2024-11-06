@@ -108,3 +108,41 @@ exports.searchActivityByKeyword = async (req, res) => {
     });
   }
 };
+exports.editActivity = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the activity ID from the route parameters
+    const { title, description, destination } = req.body; // Get the new data from the request body
+    const files = req.files; // Get the uploaded files from the request
+
+    // Check if the activity exists
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
+
+    // Update the activity details
+    if (title) activity.title = title;
+    if (description) activity.description = description;
+    if (destination) activity.destination = destination;
+
+    // If new images are uploaded, update the images array
+    if (files && files.length > 0) {
+      const imageUrls = files.map((file) => file.location); // Get new image URLs
+      activity.images = imageUrls; // Update the images in the database
+    }
+
+    // Save the updated activity
+    const updatedActivity = await activity.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Activity updated successfully",
+      data: updatedActivity,
+    });
+  } catch (err) {
+    console.error("Error updating activity:", err);
+    return res
+      .status(500)
+      .json({ message: "Error updating activity", error: err.message });
+  }
+};

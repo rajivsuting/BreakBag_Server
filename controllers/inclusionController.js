@@ -103,3 +103,35 @@ exports.searchInclusionsByKeyword = async (req, res) => {
     });
   }
 };
+
+exports.editInclusion = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the inclusion ID from the route parameters
+    const { title, description } = req.body; // Get the updated fields from the request body
+
+    // Find the inclusion by ID
+    const inclusion = await Inclusion.findById(id);
+    if (!inclusion) {
+      return res.status(404).json({ message: "Inclusion not found." });
+    }
+
+    // Update the inclusion fields if provided
+    if (title) inclusion.title = title;
+    if (description) inclusion.description = description;
+
+    // Save the updated inclusion record
+    const updatedInclusion = await inclusion.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Inclusion updated successfully",
+      data: updatedInclusion,
+    });
+  } catch (err) {
+    console.error("Error updating inclusion:", err);
+    return res.status(500).json({
+      message: "Error updating inclusion",
+      error: err.message,
+    });
+  }
+};

@@ -9,4 +9,6 @@ router.post("/travel-summary", travelSummaryController.createTravelSummary);
 router.get("/travel-summary", travelSummaryController.getAllTravelSummary);
 router.get("/search", travelSummaryController.searchTravelSummariesByKeyword);
 
+router.put("/edit/:id", travelSummaryController.editTravelSummary);
+
 module.exports = router;

@@ -96,3 +96,40 @@ exports.searchDestinationByTitle = async (req, res) => {
       .json({ message: "Error searching for destination", error: err.message });
   }
 };
+
+exports.editDestination = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the destination ID from the route parameters
+    const { title } = req.body; // Get the updated title from the request body
+    const file = req.file; // Get the uploaded file from the request (if any)
+
+    // Find the destination by ID
+    const destination = await Destination.findById(id);
+    if (!destination) {
+      return res.status(404).json({ message: "Destination not found." });
+    }
+
+    // Update the destination title if provided
+    if (title) destination.title = title;
+
+    // If a new image is uploaded, update the image URL
+    if (file) {
+      const imageUrl = file.location; // Get the new image URL from the uploaded file
+      destination.image = imageUrl; // Update the image URL in the database
+    }
+
+    // Save the updated destination record
+    const updatedDestination = await destination.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Destination updated successfully",
+      data: updatedDestination,
+    });
+  } catch (err) {
+    console.error("Error updating destination:", err);
+    return res
+      .status(500)
+      .json({ message: "Error updating destination", error: err.message });
+  }
+};
