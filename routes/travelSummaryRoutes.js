@@ -11,4 +11,6 @@ router.get("/search", travelSummaryController.searchTravelSummariesByKeyword);
 
 router.put("/edit/:id", travelSummaryController.editTravelSummary);
 
+router.delete("/delete/:id", travelSummaryController.deleteTravelSummary);
+
 module.exports = router;

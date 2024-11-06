@@ -19,6 +19,7 @@ router.get(
 );
 
 router.get("/search", exclusionController.searchExclusionsByKeyword);
-router.put("/exclusion/:id", exclusionController.editExclusion);
+router.put("/edit/:id", exclusionController.editExclusion);
+router.delete("/delete/:id", exclusionController.deleteExclusion);
 
 module.exports = router;

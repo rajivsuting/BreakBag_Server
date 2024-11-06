@@ -22,4 +22,6 @@ router.get("/search", transferController.searchTransfersByKeyword);
 
 router.put("/edit/:id", transferController.editTransfer);
 
+router.delete("/delete/:id", transferController.deleteTransfer);
+
 module.exports = router;

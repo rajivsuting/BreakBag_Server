@@ -272,14 +272,6 @@ exports.createIntenerary = async (req, res) => {
   }
 };
 
-function convertToIST(date) {
-  const indiaTime = new Date(date).toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
-  });
-  const [day, month, year] = indiaTime.split("/"); // Splitting the date format
-  return `${day}/${month}/${year}`;
-}
-
 exports.editQuote = async (req, res) => {
   try {
     const { id } = req.params; // Quote ID from URL params
@@ -321,11 +313,9 @@ exports.editQuote = async (req, res) => {
 
     // Check if end date is after start date
     if (startDate && endDate && end < start) {
-      return res
-        .status(400)
-        .json({
-          message: "End date must be after or equal to the start date.",
-        });
+      return res.status(400).json({
+        message: "End date must be after or equal to the start date.",
+      });
     }
 
     // Calculate duration if both dates are provided
@@ -358,5 +348,32 @@ exports.editQuote = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error updating quote", error: err.message });
+  }
+};
+exports.deleteQuote = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID from the request parameters
+
+    // Find and delete the quote by ID
+    const deletedQuote = await Quote.findByIdAndDelete(id);
+
+    // If no record is found, return a 404 error
+    if (!deletedQuote) {
+      return res.status(404).json({
+        message: "Quote not found.",
+      });
+    }
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Quote deleted successfully",
+      data: deletedQuote,
+    });
+  } catch (err) {
+    console.error("Error deleting quote:", err);
+    return res.status(500).json({
+      message: "Error deleting quote",
+      error: err.message,
+    });
   }
 };

@@ -135,3 +135,30 @@ exports.editInclusion = async (req, res) => {
     });
   }
 };
+exports.deleteInclusion = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the inclusion ID from the request parameters
+
+    // Find and delete the inclusion by ID
+    const deletedInclusion = await Inclusion.findByIdAndDelete(id);
+
+    // If the inclusion does not exist, return a 404 error
+    if (!deletedInclusion) {
+      return res.status(404).json({
+        message: "Inclusion not found.",
+      });
+    }
+
+    // Return a success response
+    return res.status(200).json({
+      message: "Inclusion deleted successfully",
+      data: deletedInclusion,
+    });
+  } catch (err) {
+    console.error("Error deleting inclusion:", err);
+    return res.status(500).json({
+      message: "Error deleting inclusion",
+      error: err.message,
+    });
+  }
+};

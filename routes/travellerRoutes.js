@@ -22,4 +22,6 @@ router.post("/asign", travellerController.assignTravellerToAgent);
 
 router.get("/search", travellerController.searchTravellerByName);
 
+router.delete("/delete/:id", travellerController.deleteTraveller);
+
 module.exports = router;

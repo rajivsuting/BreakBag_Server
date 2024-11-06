@@ -24,4 +24,6 @@ router.get(
 );
 
 router.put("/edit/:id", otherInformationController.editOtherInformation);
+router.delete("/delete/:id", otherInformationController.deleteOtherInformation);
+
 module.exports = router;

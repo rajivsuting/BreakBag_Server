@@ -128,3 +128,31 @@ exports.editTransfer = async (req, res) => {
     });
   }
 };
+
+exports.deleteTransfer = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID from the request parameters
+
+    // Find and delete the transfer by ID
+    const deletedTransfer = await Transfer.findByIdAndDelete(id);
+
+    // If no record is found, return a 404 error
+    if (!deletedTransfer) {
+      return res.status(404).json({
+        message: "Transfer not found.",
+      });
+    }
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Transfer deleted successfully",
+      data: deletedTransfer,
+    });
+  } catch (err) {
+    console.error("Error deleting transfer:", err);
+    return res.status(500).json({
+      message: "Error deleting transfer",
+      error: err.message,
+    });
+  }
+};

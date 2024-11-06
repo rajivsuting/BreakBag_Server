@@ -232,3 +232,30 @@ exports.searchTravellerByName = async (req, res) => {
       .json({ message: "Error searching for traveller", error: err.message });
   }
 };
+exports.deleteTraveller = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID from the request parameters
+
+    // Find and delete the traveller by ID
+    const deletedTraveller = await Traveller.findByIdAndDelete(id);
+
+    // If no traveller is found, return a 404 error
+    if (!deletedTraveller) {
+      return res.status(404).json({
+        message: "Traveller not found.",
+      });
+    }
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Traveller deleted successfully",
+      data: deletedTraveller,
+    });
+  } catch (err) {
+    console.error("Error deleting traveller:", err);
+    return res.status(500).json({
+      message: "Error deleting traveller",
+      error: err.message,
+    });
+  }
+};

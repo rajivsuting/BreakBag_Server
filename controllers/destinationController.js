@@ -133,3 +133,26 @@ exports.editDestination = async (req, res) => {
       .json({ message: "Error updating destination", error: err.message });
   }
 };
+exports.deleteDestination = async (req, res) => {
+  try {
+    const { id } = req.params; // Extract the destination ID from the URL parameters
+
+    // Find the destination by ID
+    const destination = await Destination.findById(id);
+    if (!destination) {
+      return res.status(404).json({ message: "Destination not found." });
+    }
+
+    // Delete the destination
+    await Destination.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json({ message: "Destination deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting destination:", err);
+    return res
+      .status(500)
+      .json({ message: "Error deleting destination", error: err.message });
+  }
+};

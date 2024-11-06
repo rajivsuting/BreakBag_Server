@@ -146,3 +146,24 @@ exports.editActivity = async (req, res) => {
       .json({ message: "Error updating activity", error: err.message });
   }
 };
+exports.deleteActivity = async (req, res) => {
+  try {
+    const { id } = req.params; // Activity ID from URL parameters
+
+    // Find the activity by ID
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
+
+    // Delete the activity
+    await Activity.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: "Activity deleted successfully." });
+  } catch (err) {
+    console.error("Error deleting activity:", err);
+    return res
+      .status(500)
+      .json({ message: "Error deleting activity", error: err.message });
+  }
+};

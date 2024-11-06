@@ -6,6 +6,7 @@ const {
   getAllActivity,
   searchActivityByKeyword,
   editActivity,
+  deleteActivity,
 } = require("../controllers/activityController");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
@@ -21,5 +22,6 @@ router.get("/all", getAllActivity);
 
 router.get("/search", searchActivityByKeyword);
 router.put("/edit/:id", upload.array("images", 3), editActivity);
+router.delete("/delete/:id", deleteActivity);
 
 module.exports = router;

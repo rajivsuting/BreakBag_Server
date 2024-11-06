@@ -113,12 +113,10 @@ exports.editTravelSummary = async (req, res) => {
 
   // Validate required fields
   if (!title && !description) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "At least one field (title or description) is required to update",
-      });
+    return res.status(400).json({
+      message:
+        "At least one field (title or description) is required to update",
+    });
   }
 
   try {
@@ -143,5 +141,32 @@ exports.editTravelSummary = async (req, res) => {
   } catch (error) {
     logger.error(`Error updating travel summary: ${error.message}`);
     res.status(500).json({ message: "Error updating travel summary", error });
+  }
+};
+exports.deleteTravelSummary = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the ID from the request parameters
+
+    // Find and delete the travel summary by ID
+    const deletedTravelSummary = await TravelSummary.findByIdAndDelete(id);
+
+    // If no travel summary is found, return a 404 error
+    if (!deletedTravelSummary) {
+      return res.status(404).json({
+        message: "Travel Summary not found.",
+      });
+    }
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Travel Summary deleted successfully",
+      data: deletedTravelSummary,
+    });
+  } catch (err) {
+    logger.error(`Error deleting travel summary: ${err.message}`);
+    return res.status(500).json({
+      message: "Error deleting travel summary",
+      error: err.message,
+    });
   }
 };

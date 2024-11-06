@@ -22,4 +22,5 @@ router.get(
 router.get("/search", inclusionController.searchInclusionsByKeyword);
 
 router.put("/edit/:id", inclusionController.editInclusion);
+router.delete("/delete/:id", inclusionController.deleteInclusion);
 module.exports = router;

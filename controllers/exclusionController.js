@@ -130,3 +130,28 @@ exports.editExclusion = async (req, res) => {
       .json({ message: "Error updating exclusion", error: err.message });
   }
 };
+exports.deleteExclusion = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the exclusion ID from the request parameters
+
+    // Find and delete the exclusion by ID
+    const deletedExclusion = await Exclusion.findByIdAndDelete(id);
+
+    // If the exclusion does not exist, return a 404 error
+    if (!deletedExclusion) {
+      return res.status(404).json({ message: "Exclusion not found." });
+    }
+
+    // Return a success response
+    return res.status(200).json({
+      message: "Exclusion deleted successfully",
+      data: deletedExclusion,
+    });
+  } catch (err) {
+    console.error("Error deleting exclusion:", err);
+    return res.status(500).json({
+      message: "Error deleting exclusion",
+      error: err.message,
+    });
+  }
+};
