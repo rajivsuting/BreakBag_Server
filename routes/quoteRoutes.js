@@ -19,6 +19,6 @@ router.post(
 );
 
 router.post("/itenerary/generate", quoteController.createIntenerary);
-router.patch("/edit/:quoteid", quoteController.editquote);
+router.patch("/edit/:quoteid", quoteController.editQuote);
 
 module.exports = router;
