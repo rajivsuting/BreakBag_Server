@@ -246,6 +246,9 @@ exports.createIntenerary = async (req, res) => {
 
     await exist.save();
 
+    const startDateIST = convertToIST(quote.startDate);
+    const endDateIST = convertToIST(quote.endDate);
+
     await generatePDF(
       res,
       travelSummaryDemo,
@@ -257,8 +260,8 @@ exports.createIntenerary = async (req, res) => {
       hotelData,
       transfersProcessData,
       destinationOnly,
-      quote.startDate,
-      quote.endDate
+      startDateIST,
+      endDateIST
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);
@@ -268,6 +271,14 @@ exports.createIntenerary = async (req, res) => {
     });
   }
 };
+
+function convertToIST(date) {
+  const indiaTime = new Date(date).toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+  });
+  const [day, month, year] = indiaTime.split("/"); // Splitting the date format
+  return `${day}/${month}/${year}`;
+}
 
 exports.editquote = async (req, res) => {
   const { quoteid } = req.params;
