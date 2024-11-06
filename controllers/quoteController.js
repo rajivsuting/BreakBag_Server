@@ -246,8 +246,8 @@ exports.createIntenerary = async (req, res) => {
 
     await exist.save();
 
-    const startDateIST = quote.startDate.toLocaleString("en-IN");
-    const endDateIST = quote.endDate.toLocaleString("en-IN");
+    const startDateIST = quote.startDate.toLocaleDateString("en-IN");
+    const endDateIST = quote.endDate.toLocaleDateString("en-IN");
 
     await generatePDF(
       res,
