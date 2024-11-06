@@ -246,8 +246,8 @@ exports.createIntenerary = async (req, res) => {
 
     await exist.save();
 
-    const startDateIST = quote.startDate.toLocaleDateString("en-IN");
-    const endDateIST = quote.endDate.toLocaleDateString("en-IN");
+    let startDate = new Date(quote.startDate).toLocaleDateString();
+    let endDate = new Date(quote.endDate).toLocaleDateString();
 
     await generatePDF(
       res,
@@ -260,8 +260,8 @@ exports.createIntenerary = async (req, res) => {
       hotelData,
       transfersProcessData,
       destinationOnly,
-      startDateIST,
-      endDateIST
+      startDate,
+      endDate
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);
