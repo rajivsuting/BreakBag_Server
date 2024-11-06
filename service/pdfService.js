@@ -273,7 +273,8 @@ async function generatePDF(
       .stroke(); // Render the line
 
     // Define the start date and total days
-    const startDate = start_Date; // Example start date
+    let startDate = start_Date; // Example start date
+
     const totalDays = travelSummaryDemo.length; // Number of days from the travel summary
 
     doc

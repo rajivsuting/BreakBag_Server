@@ -280,27 +280,83 @@ function convertToIST(date) {
   return `${day}/${month}/${year}`;
 }
 
-exports.editquote = async (req, res) => {
-  const { quoteid } = req.params;
-  const updateData = req.body;
-
+exports.editQuote = async (req, res) => {
   try {
-    const updatedQuote = await Quote.findByIdAndUpdate(
-      quoteid,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    const { id } = req.params; // Quote ID from URL params
+    const { travellers, destination, startDate, endDate } = req.body;
 
-    if (!updatedQuote) {
-      return res.status(404).json({ message: "Quote not found" });
+    // Find the existing quote by ID
+    const existingQuote = await Quote.findById(id);
+    if (!existingQuote) {
+      return res.status(404).json({ message: "Quote not found." });
     }
 
-    res
-      .status(200)
-      .json({ message: "Quote updated successfully", updatedQuote });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ message: "Error updating quote", error: error.message });
+    // Validate travellers array if provided
+    if (travellers && travellers.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Travellers list cannot be empty." });
+    }
+
+    // Validate destination if provided
+    if (destination === "") {
+      return res.status(400).json({ message: "Destination cannot be empty." });
+    }
+
+    // Validate and parse dates if provided
+    let start, end, duration;
+    if (startDate) {
+      start = new Date(startDate);
+      if (isNaN(start.getTime())) {
+        return res.status(400).json({ message: "Invalid start date format." });
+      }
+    }
+
+    if (endDate) {
+      end = new Date(endDate);
+      if (isNaN(end.getTime())) {
+        return res.status(400).json({ message: "Invalid end date format." });
+      }
+    }
+
+    // Check if end date is after start date
+    if (startDate && endDate && end < start) {
+      return res
+        .status(400)
+        .json({
+          message: "End date must be after or equal to the start date.",
+        });
+    }
+
+    // Calculate duration if both dates are provided
+    if (startDate && endDate) {
+      duration = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    // Update fields on the existing quote
+    const updatedQuote = await Quote.findByIdAndUpdate(
+      id,
+      {
+        ...(travellers && {
+          travellers,
+          numberOfTravellers: travellers.length,
+        }),
+        ...(destination && { destination }),
+        ...(startDate && { startDate }),
+        ...(endDate && { endDate }),
+        ...(duration && { duration }),
+      },
+      { new: true } // Return the updated document
+    );
+
+    return res.status(200).json({
+      message: "Quote updated successfully",
+      data: updatedQuote,
+    });
+  } catch (err) {
+    console.error("Error updating quote:", err);
+    return res
+      .status(500)
+      .json({ message: "Error updating quote", error: err.message });
   }
 };
