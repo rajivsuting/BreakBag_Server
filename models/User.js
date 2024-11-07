@@ -11,7 +11,6 @@ const userSchema = new Schema({
     required: true,
   },
   teamLead: {
-    // Will be populated if the user is an Agent and assigned a Team Lead
     type: Schema.Types.ObjectId,
     ref: "User",
   },

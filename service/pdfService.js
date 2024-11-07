@@ -66,8 +66,8 @@ async function generatePDF(
     const logoWidth = 100; // Adjust the size to fit your design
 
     // Calculate the position (keeping the image within bounds)
-    const logoXPosition = doc.page.width - logoWidth - 10; // 10px padding from the right
-    const yPosition = 10; // 10px padding from the top
+    const logoXPosition = doc.page.width - logoWidth - 10;
+    const yPosition = 10;
 
     // Add the logo on top of the background image
     doc.image(logoImage, logoXPosition, yPosition, {

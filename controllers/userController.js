@@ -45,18 +45,52 @@ exports.createUser = async (req, res) => {
 exports.getAllAgentsOrTeamleads = async (req, res) => {
   try {
     const { role } = req.query;
-    const agents = await User.find({ role: role });
 
-    if (agents.length === 0) {
-      return res.status(404).json({ message: `No ${role} found` });
+    if (role === "Agent") {
+      // If role is Agent, populate the teamLead field
+      const agents = await User.find({ role: "Agent" }).populate(
+        "teamLead",
+        "name email"
+      );
+
+      if (agents.length === 0) {
+        return res.status(404).json({ message: "No agents found" });
+      }
+
+      return res.status(200).json({
+        message: "Agents retrieved successfully",
+        data: agents,
+      });
+    } else if (role === "Team Lead") {
+      // If role is Team Lead, retrieve all team leads and the agents assigned to each one
+      const teamLeads = await User.find({ role: "Team Lead" }).lean();
+
+      if (teamLeads.length === 0) {
+        return res.status(404).json({ message: "No team leads found" });
+      }
+
+      // Retrieve agents for each Team Lead
+      const teamLeadsWithAgents = await Promise.all(
+        teamLeads.map(async (teamLead) => {
+          const agents = await User.find(
+            { teamLead: teamLead._id },
+            "name email phone"
+          );
+          return {
+            ...teamLead,
+            agents,
+          };
+        })
+      );
+
+      return res.status(200).json({
+        message: "Team Leads retrieved successfully",
+        data: teamLeadsWithAgents,
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid role specified" });
     }
-
-    return res.status(200).json({
-      message: `${role} retrieved successfully`,
-      data: agents,
-    });
   } catch (err) {
-    // console.error(`Error retrieving ${role}:`, err);
     return res.status(500).json({
       message: `Error retrieving ${role}`,
       error: err.message,
