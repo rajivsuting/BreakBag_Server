@@ -17,71 +17,78 @@ const commentSchema = new Schema({
   },
 });
 
-const quoteSchema = new Schema({
-  travellers: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Traveller",
-    },
-  ],
-
-  destination: {
-    type: Schema.Types.ObjectId,
-    ref: "Destination",
-  },
-
-  numberOfTravellers: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-
-  startDate: {
-    type: Date,
-    required: true,
-  },
-
-  endDate: {
-    type: Date,
-    required: true,
-  },
-
-  duration: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-
-  tripId: {
-    type: String,
-    unique: true, //TRIP-0001
-  },
-
-  status: {
-    type: String,
-    enum: [
-      "Active",
-      "Quoted",
-      "Follow Up",
-      "Confirmed",
-      "Cancelled",
-      "CNP",
-      "Groups",
+const quoteSchema = new Schema(
+  {
+    travellers: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Traveller",
+      },
     ],
-    default: "Active",
-    required: true,
-  },
-  comments: [commentSchema],
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-  },
 
-  itenerary: {
-    type: Object,
+    destination: {
+      type: Schema.Types.ObjectId,
+      ref: "Destination",
+    },
+
+    numberOfTravellers: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    startDate: {
+      type: Date,
+      required: true,
+    },
+
+    endDate: {
+      type: Date,
+      required: true,
+    },
+
+    duration: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+
+    tripId: {
+      type: String,
+      unique: true, // Example format: TRIP-0001
+    },
+
+    status: {
+      type: String,
+      enum: [
+        "Active",
+        "Quoted",
+        "Follow Up",
+        "Confirmed",
+        "Cancelled",
+        "CNP",
+        "Groups",
+      ],
+      default: "Active",
+      required: true,
+    },
+
+    comments: [commentSchema],
+
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    itenerary: {
+      type: Object,
+    },
   },
-});
+  {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
+  }
+);
 
 quoteSchema.pre("save", async function (next) {
   if (!this.tripId) {

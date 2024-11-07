@@ -275,9 +275,10 @@ exports.createIntenerary = async (req, res) => {
 exports.editQuote = async (req, res) => {
   try {
     const { id } = req.params; // Quote ID from URL params
-    const { travellers, destination, startDate, endDate } = req.body;
+    const { travellers, destination, startDate, endDate, status } = req.body;
 
     // Find the existing quote by ID
+
     const existingQuote = await Quote.findById(id);
     if (!existingQuote) {
       return res.status(404).json({ message: "Quote not found." });
@@ -335,6 +336,7 @@ exports.editQuote = async (req, res) => {
         ...(startDate && { startDate }),
         ...(endDate && { endDate }),
         ...(duration && { duration }),
+        ...(status && { status }),
       },
       { new: true } // Return the updated document
     );
@@ -350,6 +352,7 @@ exports.editQuote = async (req, res) => {
       .json({ message: "Error updating quote", error: err.message });
   }
 };
+
 exports.deleteQuote = async (req, res) => {
   try {
     const { id } = req.params; // Get the ID from the request parameters

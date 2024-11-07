@@ -102,11 +102,11 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // Generate JWT token with 24 hours expiration
+    // Generate JWT token with 30 days expiration
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: `${process.env.JWT_EXPIRES_IN}` } // Token expires in 24 hours
+      { expiresIn: "30d" } // Token expires in 30 days
     );
 
     // Clear OTP-related fields after successful login
@@ -118,7 +118,7 @@ exports.verifyOtp = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true, // Prevents client-side JS from accessing the cookie
       secure: process.env.NODE_ENV === "production", // Ensures the cookie is only sent over HTTPS in production
-      maxAge: 24 * 60 * 60 * 1000, // Cookie expires in 24 hours
+      maxAge: 30 * 24 * 60 * 60 * 1000, // Cookie expires in 30 days
       sameSite: "strict", // Protects against CSRF attacks
     });
 
