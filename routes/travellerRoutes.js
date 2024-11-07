@@ -10,7 +10,6 @@ router.post("/create", travellerController.createTraveller);
 router.get("/all", protect, travellerController.getTravellers);
 
 // Get a Traveller by ID
-router.get("/:id", travellerController.getTravellerById);
 
 // Update a Traveller by ID
 router.put("/edit/:id", travellerController.updateTraveller);
@@ -21,6 +20,7 @@ router.delete("/delete/:id", travellerController.deleteTraveller);
 router.post("/asign", travellerController.assignTravellerToAgent);
 
 router.get("/search", travellerController.searchTravellerByName);
+router.get("/:id", travellerController.getTravellerById);
 
 router.delete("/delete/:id", travellerController.deleteTraveller);
 

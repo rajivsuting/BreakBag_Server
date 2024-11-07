@@ -228,7 +228,6 @@ exports.searchTravellerByName = async (req, res) => {
       data: travellers,
     });
   } catch (err) {
-    console.error("Error searching for traveller:", err);
     return res
       .status(500)
       .json({ message: "Error searching for traveller", error: err.message });
