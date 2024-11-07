@@ -278,6 +278,7 @@ exports.editQuote = async (req, res) => {
     const { travellers, destination, startDate, endDate, status } = req.body;
 
     // Find the existing quote by ID
+
     const existingQuote = await Quote.findById(id);
     if (!existingQuote) {
       return res.status(404).json({ message: "Quote not found." });
