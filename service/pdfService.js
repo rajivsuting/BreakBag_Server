@@ -617,6 +617,13 @@ async function generatePDF(
     // Adjust the Y position for future content
     currentY += totalRowHeight;
 
+    // Define page padding and row heights
+    const pagePadding = 30;
+    const rowHeight1 = 50; // Height of each row (body)
+    const rowHeight2 = 40; // Height of the header row
+    const columnWidths1 = [140, 60, 60, 110, 55, 50, 55]; // Column widths for each cell
+
+    // Define hotel and info heading
     const hotelText = "HOTEL";
     const infoText = "Information";
 
@@ -630,99 +637,210 @@ async function generatePDF(
       .fontSize(40);
     const infoTextWidth = doc.widthOfString(infoText);
 
+    // Calculate the X position for centering the "Hotel Information" heading
     const hotelInfoHeadingWidth = hotelTextWidth + infoTextWidth;
     const InfoXPosition = (doc.page.width - hotelInfoHeadingWidth) / 2;
+    const hotelYPosition = 300;
 
-    const hotelYPosition = 300; // Adjust the Y position as needed
+    // Print hotel and info heading
     doc
       .font("Times-Bold")
       .fontSize(32)
       .fillColor("#053260")
-      .text(hotelText, InfoXPosition, hotelYPosition + 10, {
-        continued: true,
-      });
+      .text(hotelText, InfoXPosition, hotelYPosition + 10, { continued: true });
 
-    // Print "Information" with Sacramento font
     doc
       .font(path.join(__dirname, "..", "fonts", "Sacramento-Regular.ttf"))
       .fontSize(40)
       .fillColor("#ff9c00")
       .text(infoText, InfoXPosition + hotelTextWidth - 105, hotelYPosition - 5);
 
-    // Add space after the heading
-    let hotelCardYPosition = hotelYPosition + 60;
+    // Define column headers
+    const headers1 = [
+      "Hotel Name",
+      "Check-In",
+      "Check-Out",
+      "Location",
+      "Meal",
+      "Guests",
+      "Room",
+    ];
+    const headerColor = "#FFFFFF"; // White header text color
+    // Header background color
 
-    // Define card dimensions with the new height
-    const cardPadding = 20;
-    const cardWidth = (doc.page.width - 120) / 2;
-    const cardHeight = 210; // Increased by 50 pixels
+    // Calculate the tableTop position based on the height of the heading and a fixed vertical margin
+    const headingHeight = hotelYPosition + 60; // Adjust this based on the height of your headings
+    const tableTop = headingHeight; // Do not add extra margin, just use the heading height
 
-    let isLeftColumn = true;
-    let cardXPosition = 40;
+    // Draw table headers with borders
+    headers1.forEach((header, i) => {
+      const x =
+        pagePadding + columnWidths1.slice(0, i).reduce((a, b) => a + b, 0);
 
-    // Loop through the hotelData array to create a card for each hotel
-    hotelData.forEach((hotel) => {
-      if (!isLeftColumn) {
-        cardXPosition = doc.page.width / 2 + 20;
-      }
-
-      // Draw a rounded rectangle to represent the card background
+      // Set the header background color and draw the header background
       doc
-        .roundedRect(
-          cardXPosition,
-          hotelCardYPosition,
-          cardWidth,
-          cardHeight,
-          10
-        )
-        .fillAndStroke("#f0f0f0", "#053260")
-        .stroke();
+        .fillColor(headerBackgroundColor)
+        .rect(x, tableTop, columnWidths1[i], rowHeight2)
+        .fill();
 
-      const textXPosition = cardXPosition + cardPadding - 5;
-
-      // Add hotel name at the top of the card (center-aligned)
-      doc.font("Times-Bold").fontSize(16).fillColor("#053260");
-
-      // Calculate the height of the hotel name text
-      const hotelNameHeight = doc.heightOfString(hotel.name, {
-        width: cardWidth - 2 * cardPadding,
-        align: "center",
-      });
-
-      // Render the hotel name text
-      doc.text(hotel.name, textXPosition, hotelCardYPosition + 10, {
-        width: cardWidth - 2 * cardPadding,
-        align: "center",
-      });
-
-      // Position for details below the hotel name with reduced spacing
-      const detailsYPosition = hotelCardYPosition + hotelNameHeight + 5;
-
-      // Add check-in, check-out, and other details
-      const hotelDetails = `
-        Check-In: ${hotel.checkInDate}
-        Check-Out: ${hotel.checkOutDate}
-        Location: ${hotel.location}
-        Meal Plan: ${hotel.mealPlan}
-        Guests: ${hotel.numberOfGuest}
-        Room: ${hotel.roomType}
-      `;
-
+      // Set the header text color and draw the header text in front of the background
       doc
-        .font("Times-Roman")
-        .fontSize(12)
-        .fillColor("#000000")
-        .text(hotelDetails, textXPosition, detailsYPosition, {
-          width: cardWidth - 2 * cardPadding,
-          align: "center",
-          lineGap: 3,
+        .font("Helvetica-Bold")
+        .fontSize(12) // Increased font size for better visibility
+        .fillColor(headerColor)
+        .text(header, x + 5, tableTop + 5, {
+          width: columnWidths1[i] - 10,
+          align: "center", // Center-align the header text horizontally
         });
 
-      // Alternate columns for the next card
-      isLeftColumn = !isLeftColumn;
-      if (isLeftColumn) {
-        cardXPosition = 40;
-      }
+      // Draw border around each header cell
+      doc.rect(x, tableTop, columnWidths1[i], rowHeight2).stroke(); // Draw border
+    });
+
+    // Draw data rows with borders
+    doc.font("Helvetica").fontSize(10).fillColor("#000"); // Set text color to black for content
+    hotelData.forEach((hotel, rowIndex) => {
+      const rowY = tableTop + rowHeight2 + rowHeight1 * rowIndex; // Start directly after header
+
+      // Adjust vertical position slightly upwards
+      const verticalOffsetY = rowY + rowHeight1 / 2 - 5; // Shift 5 units up
+
+      // Draw each cell in the row with borders and adjust vertical alignment
+      doc.text(hotel.name, pagePadding, verticalOffsetY, {
+        width: columnWidths1[0],
+        align: "center", // Center-align the cell text horizontally
+        baseline: "middle", // Center-align the cell text vertically
+      });
+
+      doc.text(
+        hotel.checkInDate,
+        pagePadding + columnWidths1[0],
+        verticalOffsetY,
+        {
+          width: columnWidths1[1],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+      doc.text(
+        hotel.checkOutDate,
+        pagePadding + columnWidths1[0] + columnWidths1[1],
+        verticalOffsetY,
+        {
+          width: columnWidths1[2],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+      doc.text(
+        hotel.location,
+        pagePadding + columnWidths1[0] + columnWidths1[1] + columnWidths1[2],
+        verticalOffsetY,
+        {
+          width: columnWidths1[3],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+      doc.text(
+        hotel.mealPlan,
+        pagePadding +
+          columnWidths1[0] +
+          columnWidths1[1] +
+          columnWidths1[2] +
+          columnWidths1[3],
+        verticalOffsetY,
+        {
+          width: columnWidths1[4],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+      doc.text(
+        hotel.numberOfGuest.toString(),
+        pagePadding +
+          columnWidths1[0] +
+          columnWidths1[1] +
+          columnWidths1[2] +
+          columnWidths1[3] +
+          columnWidths1[4],
+        verticalOffsetY,
+        {
+          width: columnWidths1[5],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+      doc.text(
+        hotel.roomType,
+        pagePadding + columnWidths1.slice(0, -1).reduce((a, b) => a + b, 0),
+        verticalOffsetY,
+        {
+          width: columnWidths1[6],
+          align: "center",
+          baseline: "middle",
+        }
+      );
+
+      // Draw border around each cell
+      doc.rect(pagePadding, rowY, columnWidths1[0], rowHeight1).stroke();
+      doc
+        .rect(
+          pagePadding + columnWidths1[0],
+          rowY,
+          columnWidths1[1],
+          rowHeight1
+        )
+        .stroke();
+      doc
+        .rect(
+          pagePadding + columnWidths1[0] + columnWidths1[1],
+          rowY,
+          columnWidths1[2],
+          rowHeight1
+        )
+        .stroke();
+      doc
+        .rect(
+          pagePadding + columnWidths1[0] + columnWidths1[1] + columnWidths1[2],
+          rowY,
+          columnWidths1[3],
+          rowHeight1
+        )
+        .stroke();
+      doc
+        .rect(
+          pagePadding +
+            columnWidths1[0] +
+            columnWidths1[1] +
+            columnWidths1[2] +
+            columnWidths1[3],
+          rowY,
+          columnWidths1[4],
+          rowHeight1
+        )
+        .stroke();
+      doc
+        .rect(
+          pagePadding +
+            columnWidths1[0] +
+            columnWidths1[1] +
+            columnWidths1[2] +
+            columnWidths1[3] +
+            columnWidths1[4],
+          rowY,
+          columnWidths1[5],
+          rowHeight1
+        )
+        .stroke();
+      doc
+        .rect(
+          pagePadding + columnWidths1.slice(0, -1).reduce((a, b) => a + b, 0),
+          rowY,
+          columnWidths1[6],
+          rowHeight1
+        )
+        .stroke();
     });
 
     let dayCount = 1;
@@ -927,9 +1045,8 @@ async function generatePDF(
       .strokeColor("#000000")
       .stroke();
 
-    let inclusionY = 150;
+    let inclusionY = 120;
 
-    // Iterate through each item in the inclusionData.itemList
     for (let i = 0; i < inclusionData.itemList.length; i++) {
       const item = inclusionData.itemList[i];
 
@@ -945,10 +1062,10 @@ async function generatePDF(
           align: "left",
         });
 
-      inclusionY = doc.y + 10;
+      inclusionY = doc.y + 10; // Space below the title
 
-      // Print the description in bullet points
-      for (const desc of item.description) {
+      // Loop through each description item to print with bullet points
+      item.description.forEach((desc) => {
         doc
           .font("Times-Roman")
           .fontSize(14)
@@ -958,10 +1075,12 @@ async function generatePDF(
             width: doc.page.width - 2 * padding,
           });
 
+        // Move Y position down for the next bullet point
         inclusionY = doc.y + 5;
-      }
+      });
 
-      inclusionY = doc.y + 15;
+      // Add extra space after each item before the next title
+      inclusionY += 10;
     }
 
     // -----------------------------Transfers---------------------------

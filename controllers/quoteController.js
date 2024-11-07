@@ -229,16 +229,15 @@ exports.createIntenerary = async (req, res) => {
       (transfer) => transfer.description
     );
 
-    const inclusionData = {
-      itemList: selectedInclusions.map((inclusion) => {
-        let descriptionArray = [inclusion.description];
+    // console.log(selectedInclusions);
 
-        return {
-          title: inclusion.title,
-          description: descriptionArray,
-        };
-      }),
+    const inclusionData = {
+      itemList: selectedInclusions.map((item) => ({
+        title: item.title,
+        description: item.description,
+      })),
     };
+    // console.log(inclusionData);
 
     const exist = await Quote.findById(quote._id);
 
