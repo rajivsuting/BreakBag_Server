@@ -61,6 +61,7 @@ exports.getTravellers = async (req, res) => {
     if (loggedInUser.role === "Admin") {
       // Admin: Can view all travellers
       travellers = await Traveller.find()
+        .populate("agentAssigned", "name email") // Populate agentAssigned with selected fields
         .skip(skip)
         .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
         .lean(); // Performance optimization: returns plain JS objects
@@ -72,6 +73,7 @@ exports.getTravellers = async (req, res) => {
       travellers = await Traveller.find({
         agentAssigned: loggedInUser.userId,
       })
+        .populate("agentAssigned", "name email") // Populate agentAssigned with selected fields
         .skip(skip)
         .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
         .lean();
