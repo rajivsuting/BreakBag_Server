@@ -1,5 +1,6 @@
 const User = require("../models/User"); // Assuming the User model is in the models folder
 const Quote = require("../models/quote");
+const Traveller = require("../models/traveller");
 
 exports.createUser = async (req, res) => {
   const { name, email, phone, role, teamLeadId } = req.body;
@@ -119,7 +120,7 @@ exports.getAllAgentsOrTeamleads = async (req, res) => {
     }
   } catch (err) {
     return res.status(500).json({
-      message: `Error retrieving ${role}`,
+      message: `Error retrieving ${req.query.role || "data"}`,
       error: err.message,
     });
   }
