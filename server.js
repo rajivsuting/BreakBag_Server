@@ -15,7 +15,6 @@ const pdfRoutes = require("./routes/pdfRoutes");
 const userRoutes = require("./routes/userRoutes");
 const logger = require("./config/logger");
 const connectDB = require("./db/connectDB");
-// const Fuse = require("fuse.js");
 
 const cookieParser = require("cookie-parser");
 const { protect } = require("./middleware/authMiddleware");
@@ -23,7 +22,10 @@ const { default: axios } = require("axios");
 
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+
+// Set a custom payload limit to avoid PayloadTooLargeError
+app.use(express.json({ limit: "100mb" })); // Set the limit here
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(cookieParser());
 
 connectDB();
@@ -35,6 +37,7 @@ app.use("/api/validateToken", protect, (req, res) => {
     res.send(error);
   }
 });
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/destination", destinationRoutes);
