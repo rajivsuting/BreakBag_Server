@@ -7,7 +7,7 @@ const {
   searchActivityByKeyword,
   editActivity,
   deleteActivity,
-  removeImagesFromActivity,
+  removeImageFromActivity,
 } = require("../controllers/activityController");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
@@ -24,6 +24,6 @@ router.get("/all", getAllActivity);
 router.get("/search", searchActivityByKeyword);
 router.put("/edit/:id", upload.array("images", 3), editActivity);
 router.delete("/delete/:id", deleteActivity);
-router.delete("/activities/:id/remove-images", removeImagesFromActivity);
+router.patch("/activities/:id/remove-images", removeImageFromActivity);
 
 module.exports = router;
