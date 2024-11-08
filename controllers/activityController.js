@@ -168,30 +168,37 @@ exports.deleteActivity = async (req, res) => {
   }
 };
 
-exports.removeImagesFromActivity = async (req, res) => {
+exports.removeImageFromActivity = async (req, res) => {
   try {
     const { id } = req.params; // Activity ID from URL parameters
-    const { imageUrls } = req.body; // Array of image URLs to be removed
+    const { imageUrl } = req.body; // Single image URL to be removed
 
+    // Find the activity by ID
     const activity = await Activity.findById(id);
     if (!activity) {
       return res.status(404).json({ message: "Activity not found." });
     }
 
-    activity.images = activity.images.filter((url) => !imageUrls.includes(url));
+    // Remove the image if it exists in the images array
+    const imageIndex = activity.images.indexOf(imageUrl);
+    if (imageIndex === -1) {
+      return res.status(404).json({ message: "Image not found in activity." });
+    }
+
+    activity.images.splice(imageIndex, 1); // Remove the image from the array
 
     // Save the updated activity
     const updatedActivity = await activity.save();
 
     // Send a success response
     return res.status(200).json({
-      message: "Images removed from activity successfully",
+      message: "Image removed from activity successfully",
       data: updatedActivity,
     });
   } catch (error) {
-    console.error("Error removing images from activity:", error);
+    console.error("Error removing image from activity:", error);
     return res.status(500).json({
-      message: "Error removing images from activity",
+      message: "Error removing image from activity",
       error: error.message,
     });
   }
