@@ -123,12 +123,21 @@ exports.getTravellerById = async (req, res) => {
 // Update a Traveller by ID
 exports.updateTraveller = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, address } = req.body;
+  const { name, email, phone, address, agentAssigned } = req.body;
 
   try {
+    // Create an update object with only the fields provided in the request
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone) updateData.phone = phone;
+    if (address) updateData.address = address;
+    if (agentAssigned) updateData.agentAssigned = agentAssigned;
+
+    // Update the traveller document with the dynamically created update object
     const traveller = await Traveller.findByIdAndUpdate(
       id,
-      { name, email, phone, address },
+      { $set: updateData },
       { new: true, runValidators: true }
     ).lean(); // Performance optimization
 
