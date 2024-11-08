@@ -128,7 +128,7 @@ exports.editActivity = async (req, res) => {
     // If new images are uploaded, update the images array
     if (files && files.length > 0) {
       const imageUrls = files.map((file) => file.location); // Get new image URLs
-      activity.images = imageUrls; // Update the images in the database
+      activity.images.push(...imageUrls); // Update the images in the database
     }
 
     // Save the updated activity
@@ -165,5 +165,34 @@ exports.deleteActivity = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error deleting activity", error: err.message });
+  }
+};
+
+exports.removeImagesFromActivity = async (req, res) => {
+  try {
+    const { id } = req.params; // Activity ID from URL parameters
+    const { imageUrls } = req.body; // Array of image URLs to be removed
+
+    const activity = await Activity.findById(id);
+    if (!activity) {
+      return res.status(404).json({ message: "Activity not found." });
+    }
+
+    activity.images = activity.images.filter((url) => !imageUrls.includes(url));
+
+    // Save the updated activity
+    const updatedActivity = await activity.save();
+
+    // Send a success response
+    return res.status(200).json({
+      message: "Images removed from activity successfully",
+      data: updatedActivity,
+    });
+  } catch (error) {
+    console.error("Error removing images from activity:", error);
+    return res.status(500).json({
+      message: "Error removing images from activity",
+      error: error.message,
+    });
   }
 };
