@@ -37,10 +37,24 @@ async function generatePDF(
   end_Date
 ) {
   try {
-    // Create a new PDF document with A4 size
     const doc = new PDFDocument({ size: "A4" });
+    const buffers = [];
 
-    // Set the response headers
+    // Set up to collect data
+    doc.on("data", buffers.push.bind(buffers));
+    doc.on("end", async () => {
+      // After generating the main PDF, concatenate with Pdf_1.pdf
+      const generatedPdfBuffer = Buffer.concat(buffers);
+      const concatenatedPdfBuffer = await concatenatePDFs(generatedPdfBuffer);
+
+      // Send the concatenated PDF as the response
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=BreakBagItinerary_Concatenated.pdf"
+      );
+      res.end(concatenatedPdfBuffer);
+    });
 
     // Define padding on all sides
     const padding = 30;
@@ -1372,17 +1386,49 @@ async function generatePDF(
     });
 
     doc.end();
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      "attachment; filename=BreakBagItenerary.pdf"
-    );
+    // res.setHeader("Content-Type", "application/pdf");
+    // res.setHeader(
+    //   "Content-Disposition",
+    //   "attachment; filename=BreakBagItenerary.pdf"
+    // );
 
-    // Pipe the PDF into the response
-    doc.pipe(res);
+    // // Pipe the PDF into the response
+    // doc.pipe(res);
     // res.end(mergedPdfBytes);
   } catch (error) {
     console.error("Error generating PDF:", error);
+  }
+}
+
+// Helper function to concatenate PDFs
+async function concatenatePDFs(generatedPdfBuffer) {
+  try {
+    const generatedPdfDoc = await PDFLibDocument.load(generatedPdfBuffer);
+    const additionalPdfPath = path.join(__dirname, "Pdf.pdf");
+    const additionalPdfBytes = fs.readFileSync(additionalPdfPath);
+    const additionalPdfDoc = await PDFLibDocument.load(additionalPdfBytes);
+
+    const concatenatedPdfDoc = await PDFLibDocument.create();
+
+    // Copy all pages from the generated PDF
+    const generatedPages = await concatenatedPdfDoc.copyPages(
+      generatedPdfDoc,
+      generatedPdfDoc.getPageIndices()
+    );
+    generatedPages.forEach((page) => concatenatedPdfDoc.addPage(page));
+
+    // Copy all pages from Pdf_1.pdf
+    const additionalPages = await concatenatedPdfDoc.copyPages(
+      additionalPdfDoc,
+      additionalPdfDoc.getPageIndices()
+    );
+    additionalPages.forEach((page) => concatenatedPdfDoc.addPage(page));
+
+    // Convert to Buffer for sending in response
+    return await concatenatedPdfDoc.save();
+  } catch (error) {
+    console.error("Error concatenating PDFs:", error);
+    throw error;
   }
 }
 
