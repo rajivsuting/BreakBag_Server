@@ -201,7 +201,7 @@ exports.createIntenerary = async (req, res) => {
       description: item.summaryDetails.description,
     }));
 
-    const hotelData = selectedHotel.map((hotel) => ({
+    let hotelData = selectedHotel.map((hotel) => ({
       name: hotel.name,
       checkInDate: hotel.checkInDate,
       checkOutDate: hotel.checkOutDate,
@@ -210,6 +210,10 @@ exports.createIntenerary = async (req, res) => {
       numberOfGuest: parseInt(hotel.numberOfGuest),
       roomType: hotel.roomType,
     }));
+
+    hotelData = hotelData.sort(
+      (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
+    );
 
     const detailedItineraryData = activityPerDay.map((activity) => ({
       title: activity.summaryDetails.title,
