@@ -245,7 +245,17 @@ exports.createIntenerary = async (req, res) => {
 
     const exist = await Quote.findById(quote._id);
 
-    exist.itenerary = req.body;
+        exist.itenerary = {
+      travelSummaryPerDay,
+      priceDetails,
+      selectedHotel,
+      selectedExclusions,
+      selectedOtherInformation,
+      selectedTransfers,
+      selectedInclusions,
+      activityPerDay,
+      destinationOnly,
+    };
 
     await exist.save();
 
