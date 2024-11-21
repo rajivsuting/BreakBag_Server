@@ -150,20 +150,26 @@ exports.getAllTeamLeads = async (req, res) => {
 // Edit agent details
 exports.editAgent = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone, isTeamlead } = req.body;
+  const { name, email, phone, role } = req.body;
 
   try {
+    // Find the agent by ID
     const agent = await User.findById(id);
-    if (!agent || agent.role !== "Agent") {
-      return res.status(404).json({ message: "Agent not found" });
+    if (!agent || (agent.role !== "Agent" && agent.role !== "Team Lead")) {
+      return res.status(404).json({ message: "Agent or Team Lead not found" });
+    }
+
+    // If the role is being updated to 'Team Lead'
+    if (agent.role === "Team Lead" && role !== "Team Lead") {
+      // Remove references to this user from other users
+      await User.updateMany({ teamLead: id }, { $unset: { teamLead: "" } });
     }
 
     // Update agent details
     agent.name = name || agent.name;
     agent.email = email || agent.email;
     agent.phone = phone || agent.phone;
-    agent.isTeamlead =
-      typeof isTeamlead === "boolean" ? isTeamlead : agent.isTeamlead;
+    agent.role = role || agent.role;
 
     await agent.save();
 
