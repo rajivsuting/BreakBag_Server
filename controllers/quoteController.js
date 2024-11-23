@@ -62,6 +62,7 @@ exports.getAllQuotes = async (req, res) => {
   try {
     const { userId } = req.user;
     const { role } = req.user;
+
     // console.log("get",req.user)
     let quotes;
     if (role === "Admin") {
@@ -288,7 +289,14 @@ exports.createIntenerary = async (req, res) => {
 exports.editQuote = async (req, res) => {
   try {
     const { id } = req.params; // Quote ID from URL params
-    const { travellers, destination, startDate, endDate, status } = req.body;
+    const {
+      travellers,
+      destination,
+      startDate,
+      endDate,
+      status,
+      numberOfTravellers,
+    } = req.body;
 
     // Find the existing quote by ID
 
@@ -350,6 +358,7 @@ exports.editQuote = async (req, res) => {
         ...(endDate && { endDate }),
         ...(duration && { duration }),
         ...(status && { status }),
+        ...(numberOfTravellers && { numberOfTravellers }),
       },
       { new: true } // Return the updated document
     );

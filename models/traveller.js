@@ -9,6 +9,7 @@ const travellerSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: false,
     match: [
       /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
       "Please provide a valid email address",
@@ -30,6 +31,11 @@ const travellerSchema = new Schema({
   },
 
   agentAssigned: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  team: {
     type: Schema.Types.ObjectId,
     ref: "User",
     default: null,

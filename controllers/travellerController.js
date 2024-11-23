@@ -24,14 +24,21 @@ exports.createTraveller = async (req, res) => {
   }
 
   try {
+    const agent = await User.findById(agentAssigned);
+    if (!agent) {
+      return res.status(400).json({ message: "Invalid agent assigned" });
+    }
+
+    const team = agent.teamLead;
+    console.log(team);
     const traveller = new Traveller({
       name,
       email,
       phone,
       address,
-
       userType,
       agentAssigned,
+      team,
     });
     await traveller.save();
     res
@@ -67,7 +74,7 @@ exports.getTravellers = async (req, res) => {
         .lean(); // Performance optimization: returns plain JS objects
 
       total = await Traveller.countDocuments();
-    } else {
+    } else if (loggedInUser.role === "Agent") {
       // Non-Admin: Can only view travellers assigned to them
       travellers = await Traveller.find({
         agentAssigned: loggedInUser.userId,
@@ -79,6 +86,16 @@ exports.getTravellers = async (req, res) => {
 
       total = await Traveller.countDocuments({
         agentAssigned: loggedInUser.userId,
+      });
+    } else {
+      travellers = await Traveller.find({ team: loggedInUser.userId })
+        .populate("agentAssigned", "name email")
+        .skip(skip)
+        .limit(limitNum || 0)
+        .lean();
+
+      total = await Traveller.countDocuments({
+        team: loggedInUser.userId,
       });
     }
 

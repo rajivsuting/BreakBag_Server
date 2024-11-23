@@ -7,12 +7,11 @@ const { restrictTo, protect } = require("../middleware/authMiddleware");
 router.post("/create", userController.createUser);
 
 // Get all agents
-router.get("/all", userController.getAllAgentsOrTeamleads);
+router.get("/all", protect, userController.getAllAgentsOrTeamleads);
 
 // Edit agent details
 router.put("/edit/:id", userController.editAgent);
 
-// Delete an agent
 router.delete("/delete/:id", userController.deleteUser);
 
 router.get(

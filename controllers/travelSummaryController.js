@@ -145,19 +145,16 @@ exports.editTravelSummary = async (req, res) => {
 };
 exports.deleteTravelSummary = async (req, res) => {
   try {
-    const { id } = req.params; // Get the ID from the request parameters
+    const { id } = req.params;
 
-    // Find and delete the travel summary by ID
     const deletedTravelSummary = await TravelSummary.findByIdAndDelete(id);
 
-    // If no travel summary is found, return a 404 error
     if (!deletedTravelSummary) {
       return res.status(404).json({
         message: "Travel Summary not found.",
       });
     }
 
-    // Send a success response
     return res.status(200).json({
       message: "Travel Summary deleted successfully",
       data: deletedTravelSummary,

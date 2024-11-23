@@ -46,15 +46,87 @@ exports.createUser = async (req, res) => {
 exports.getAllAgentsOrTeamleads = async (req, res) => {
   try {
     const { role } = req.query;
+    const loggedInUser = req.user;
 
-    if (role === "Agent") {
-      // If role is Agent, populate the teamLead field and get travellers assigned to each agent
-      const agents = await User.find({ role: "Agent" })
-        .populate("teamLead", "name email")
-        .lean();
+    if (loggedInUser.role === "Admin") {
+      if (role === "Agent") {
+        const agents = await User.find({ role: "Agent" })
+          .populate("teamLead", "name email")
+          .lean();
+
+        if (agents.length === 0) {
+          return res.status(404).json({ message: "No agents found" });
+        }
+
+        // Retrieve travellers for each Agent
+        const agentsWithTravellers = await Promise.all(
+          agents.map(async (agent) => {
+            const travellers = await Traveller.find(
+              { agentAssigned: agent._id },
+              "name email phone address userType"
+            );
+            return {
+              ...agent,
+              travellers,
+            };
+          })
+        );
+
+        return res.status(200).json({
+          message: "Agents retrieved successfully",
+          data: agentsWithTravellers,
+        });
+      } else if (role === "Team Lead") {
+        const teamLeads = await User.find({ role: "Team Lead" }).lean();
+
+        if (teamLeads.length === 0) {
+          return res.status(404).json({ message: "No team leads found" });
+        }
+
+        const teamLeadsWithAgentsAndTravellers = await Promise.all(
+          teamLeads.map(async (teamLead) => {
+            const agents = await User.find(
+              { teamLead: teamLead._id },
+              "name email phone"
+            ).lean();
+
+            const agentsWithTravellers = await Promise.all(
+              agents.map(async (agent) => {
+                const travellers = await Traveller.find(
+                  { agentAssigned: agent._id },
+                  "name email phone address userType"
+                );
+                return {
+                  ...agent,
+                  travellers,
+                };
+              })
+            );
+
+            return {
+              ...teamLead,
+              agents: agentsWithTravellers,
+            };
+          })
+        );
+
+        return res.status(200).json({
+          message: "Team Leads retrieved successfully",
+          data: teamLeadsWithAgentsAndTravellers,
+        });
+      } else {
+        return res.status(400).json({ message: "Invalid role specified" });
+      }
+    } else if (loggedInUser.role === "Team Lead") {
+      const agents = await User.find({
+        role: "Agent",
+        teamLead: loggedInUser.userId,
+      }).lean();
 
       if (agents.length === 0) {
-        return res.status(404).json({ message: "No agents found" });
+        return res
+          .status(404)
+          .json({ message: "No agents found for this Team Lead" });
       }
 
       // Retrieve travellers for each Agent
@@ -75,48 +147,8 @@ exports.getAllAgentsOrTeamleads = async (req, res) => {
         message: "Agents retrieved successfully",
         data: agentsWithTravellers,
       });
-    } else if (role === "Team Lead") {
-      // If role is Team Lead, retrieve all team leads, the agents under each, and the travellers assigned to each agent
-      const teamLeads = await User.find({ role: "Team Lead" }).lean();
-
-      if (teamLeads.length === 0) {
-        return res.status(404).json({ message: "No team leads found" });
-      }
-
-      // Retrieve agents and travellers for each Team Lead
-      const teamLeadsWithAgentsAndTravellers = await Promise.all(
-        teamLeads.map(async (teamLead) => {
-          const agents = await User.find(
-            { teamLead: teamLead._id },
-            "name email phone"
-          ).lean();
-
-          const agentsWithTravellers = await Promise.all(
-            agents.map(async (agent) => {
-              const travellers = await Traveller.find(
-                { agentAssigned: agent._id },
-                "name email phone address userType"
-              );
-              return {
-                ...agent,
-                travellers,
-              };
-            })
-          );
-
-          return {
-            ...teamLead,
-            agents: agentsWithTravellers,
-          };
-        })
-      );
-
-      return res.status(200).json({
-        message: "Team Leads retrieved successfully",
-        data: teamLeadsWithAgentsAndTravellers,
-      });
     } else {
-      return res.status(400).json({ message: "Invalid role specified" });
+      return res.status(403).json({ message: "Unauthorized access" });
     }
   } catch (err) {
     return res.status(500).json({
