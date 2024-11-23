@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: { type: String, required: true }, // Adding name for user identification
+  name: { type: String, required: true },
   email: { type: String, unique: true, required: true },
-  phone: { type: String, required: true }, // Add phone for OTP verification
+  phone: { type: String, required: true },
   role: {
     type: String,
     enum: ["Admin", "Agent", "Team Lead"],
@@ -15,18 +15,17 @@ const userSchema = new Schema({
     ref: "User",
   },
   otp: String,
-  otpExpiry: Date, // Field for storing OTP expiration time
+  otpExpiry: Date,
   createdAt: {
     type: Date,
-    default: Date.now, // Timestamp for when the user is created
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now, // Timestamp for tracking last update
+    default: Date.now,
   },
 });
 
-// Middleware to automatically update 'updatedAt' on save
 userSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();

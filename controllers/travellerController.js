@@ -66,19 +66,17 @@ exports.getTravellers = async (req, res) => {
         .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
         .lean(); // Performance optimization: returns plain JS objects
 
-      // Get the total number of travellers
       total = await Traveller.countDocuments();
     } else {
       // Non-Admin: Can only view travellers assigned to them
       travellers = await Traveller.find({
         agentAssigned: loggedInUser.userId,
       })
-        .populate("agentAssigned", "name email") // Populate agentAssigned with selected fields
+        .populate("agentAssigned", "name email")
         .skip(skip)
-        .limit(limitNum || 0) // If limitNum is not provided, it will return all documents
+        .limit(limitNum || 0)
         .lean();
 
-      // Get the total number of travellers assigned to the user
       total = await Traveller.countDocuments({
         agentAssigned: loggedInUser.userId,
       });
