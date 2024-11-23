@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Counter = require("./Counter");
+
 const Schema = mongoose.Schema;
 
 const commentSchema = new Schema({
@@ -10,7 +12,6 @@ const commentSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "User",
   },
-
   createdAt: {
     type: Date,
     default: Date.now,
@@ -25,39 +26,32 @@ const quoteSchema = new Schema(
         ref: "Traveller",
       },
     ],
-
     destination: {
       type: Schema.Types.ObjectId,
       ref: "Destination",
     },
-
     numberOfTravellers: {
       type: Number,
       required: true,
       min: 1,
     },
-
     startDate: {
       type: Date,
       required: true,
     },
-
     endDate: {
       type: Date,
       required: true,
     },
-
     duration: {
       type: Number,
       required: true,
       min: 1,
     },
-
     tripId: {
       type: String,
       unique: true, // Example format: TRIP-0001
     },
-
     status: {
       type: String,
       enum: [
@@ -72,15 +66,12 @@ const quoteSchema = new Schema(
       default: "Active",
       required: true,
     },
-
     comments: [commentSchema],
-
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },
-
     itenerary: {
       type: Object,
     },
@@ -92,10 +83,21 @@ const quoteSchema = new Schema(
 
 quoteSchema.pre("save", async function (next) {
   if (!this.tripId) {
-    const count = await mongoose.model("Quote").countDocuments();
+    const sequenceName = "tripIdCounter";
+
+    // Find and increment the counter atomically
+    const counter = await Counter.findOneAndUpdate(
+      { sequenceName },
+      { $inc: { sequenceValue: 1 } },
+      { new: true }
+    );
+
+    if (!counter) {
+      throw new Error(`Counter for "${sequenceName}" not found.`);
+    }
 
     // Generate the tripId with leading zeros (e.g., TRIP-0001, TRIP-0002)
-    const tripNumber = (count + 1).toString().padStart(4, "0");
+    const tripNumber = counter.sequenceValue.toString().padStart(4, "0");
     this.tripId = `TRIP-${tripNumber}`;
   }
   next();
