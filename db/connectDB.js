@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-// require("dotenv").config();
+const Counter = require("../models/Counter"); // Adjust path if necessary
 
 const connectDB = async () => {
   try {
@@ -7,8 +7,17 @@ const connectDB = async () => {
     console.log(
       `MongoDB Connected: ${connection.connection.host} ${connection.connection.name}`
     );
+
+    // Initialize the Counter model for tripId
+    const sequenceName = "tripIdCounter";
+    const counterExists = await Counter.findOne({ sequenceName });
+
+    if (!counterExists) {
+      await Counter.create({ sequenceName, sequenceValue: 0 });
+      console.log(`Counter "${sequenceName}" initialized.`);
+    }
   } catch (error) {
-    console.log(error);
+    console.error("Error connecting to MongoDB:", error);
     process.exit(1);
   }
 };
