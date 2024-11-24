@@ -181,38 +181,44 @@ exports.getAllTeamLeads = async (req, res) => {
 
 // Edit agent details
 exports.editAgent = async (req, res) => {
-  const { id } = req.params;
-  const { name, email, phone, role } = req.body;
+  const { id } = req.params; // ID of the user to be updated
+  const { name, email, phone, role } = req.body; // Updated details
 
   try {
-    // Find the agent by ID
-    const agent = await User.findById(id);
-    if (!agent || (agent.role !== "Agent" && agent.role !== "Team Lead")) {
+    // Find the user by ID
+    const user = await User.findById(id);
+
+    if (!user || (user.role !== "Agent" && user.role !== "Team Lead")) {
       return res.status(404).json({ message: "Agent or Team Lead not found" });
     }
 
-    // If the role is being updated to 'Team Lead'
-    if (agent.role === "Team Lead" && role !== "Team Lead") {
-      // Remove references to this user from other users
+    // If the role is being updated
+    if (user.role === "Team Lead" && role !== "Team Lead") {
+      // If the user is currently a Team Lead and their role is being updated to anything else
+      // Remove `team` reference from all travellers assigned to this Team Lead
+      await Traveller.updateMany({ team: id }, { $unset: { team: "" } });
+
+      // Remove `teamLead` reference from all agents managed by this Team Lead
       await User.updateMany({ teamLead: id }, { $unset: { teamLead: "" } });
     }
 
-    // Update agent details
-    agent.name = name || agent.name;
-    agent.email = email || agent.email;
-    agent.phone = phone || agent.phone;
-    agent.role = role || agent.role;
+    // Update the user details
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+    user.role = role || user.role;
 
-    await agent.save();
+    // Save the updated user
+    await user.save();
 
     return res.status(200).json({
-      message: "Agent updated successfully",
-      data: agent,
+      message: "User updated successfully",
+      data: user,
     });
   } catch (err) {
-    console.error("Error updating agent:", err);
+    console.error("Error updating user:", err);
     return res.status(500).json({
-      message: "Error updating agent",
+      message: "Error updating user",
       error: err.message,
     });
   }
@@ -312,9 +318,16 @@ exports.assignAgentsToTeamLead = async (req, res) => {
       });
     }
 
+    // Update the `team` field in the Traveller schema for travellers assigned to these agents
+    const travellersResult = await Traveller.updateMany(
+      { agentAssigned: { $in: agentIds } }, // Find travellers of the assigned agents
+      { $set: { team: teamLeadId } } // Assign the new team lead to their team field
+    );
+
     return res.status(200).json({
       message: "Agents assigned to Team Lead successfully",
-      modifiedCount: result.nModified, // Number of agents modified
+      agentsModifiedCount: result.nModified, // Number of agents modified
+      travellersModifiedCount: travellersResult.nModified, // Number of travellers modified
     });
   } catch (err) {
     console.error("Error assigning agents:", err);
