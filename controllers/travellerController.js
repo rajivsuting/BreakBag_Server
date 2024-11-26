@@ -16,7 +16,7 @@ const handleErrors = (error, res, customMessage = null) => {
 // Create a Traveller
 exports.createTraveller = async (req, res) => {
   const { name, email, phone, address, userType } = req.body;
-  let { agentAssigned } = req.body; // Extract agentAssigned if provided in the request
+  let { agentAssigned } = req.body;
 
   if (!name || !email || !address) {
     return res
@@ -25,12 +25,11 @@ exports.createTraveller = async (req, res) => {
   }
 
   try {
-    // Check the role of the logged-in user
     const loggedInUser = req.user; // Assuming req.user is populated by authentication middleware
 
     if (loggedInUser.role === "Agent") {
       // If the user is an Agent, set agentAssigned to the logged-in user's ID
-      agentAssigned = loggedInUser._id;
+      agentAssigned = loggedInUser.userId;
     } else if (
       (loggedInUser.role === "Team Lead" || loggedInUser.role === "Admin") &&
       !agentAssigned
