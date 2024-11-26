@@ -75,6 +75,17 @@ const quoteSchema = new Schema(
     itenerary: {
       type: Object,
     },
+
+    numberChildTravellers: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    numberOfAdultTravellers: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

@@ -15,7 +15,8 @@ const handleErrors = (error, res, customMessage = null) => {
 
 // Create a Traveller
 exports.createTraveller = async (req, res) => {
-  const { name, email, phone, address, userType, agentAssigned } = req.body;
+  const { name, email, phone, address, userType } = req.body;
+  let { agentAssigned } = req.body; // Extract agentAssigned if provided in the request
 
   if (!name || !email || !address) {
     return res
@@ -24,26 +25,53 @@ exports.createTraveller = async (req, res) => {
   }
 
   try {
-    const agent = await User.findById(agentAssigned);
-    if (!agent) {
-      return res.status(400).json({ message: "Invalid agent assigned" });
+    // Check the role of the logged-in user
+    const loggedInUser = req.user; // Assuming req.user is populated by authentication middleware
+
+    if (loggedInUser.role === "Agent") {
+      // If the user is an Agent, set agentAssigned to the logged-in user's ID
+      agentAssigned = loggedInUser._id;
+    } else if (
+      (loggedInUser.role === "Team Lead" || loggedInUser.role === "Admin") &&
+      !agentAssigned
+    ) {
+      // If the user is a Team Lead or Admin, agentAssigned must come from req.body
+      return res
+        .status(400)
+        .json({ message: "Agent assignment is required for this action." });
     }
 
-    const team = agent.teamLead;
-    console.log(team);
-    const traveller = new Traveller({
-      name,
-      email,
-      phone,
-      address,
-      userType,
-      agentAssigned,
-      team,
-    });
-    await traveller.save();
-    res
-      .status(201)
-      .json({ message: "Traveller created successfully", traveller });
+    // Validate the agentAssigned field
+    if (agentAssigned) {
+      const agent = await User.findById(agentAssigned);
+      if (!agent || agent.role !== "Agent") {
+        return res
+          .status(400)
+          .json({ message: "Invalid or unauthorized agent assigned" });
+      }
+
+      // Retrieve the Team Lead associated with the agent
+      const team = agent.teamLead;
+
+      // Create the traveller
+      const traveller = new Traveller({
+        name,
+        email,
+        phone,
+        address,
+        userType,
+        agentAssigned,
+        team,
+      });
+      await traveller.save();
+
+      return res.status(201).json({
+        message: "Traveller created successfully",
+        traveller,
+      });
+    } else {
+      return res.status(400).json({ message: "Agent assignment is missing." });
+    }
   } catch (error) {
     handleErrors(error, res, "Error creating traveller");
   }

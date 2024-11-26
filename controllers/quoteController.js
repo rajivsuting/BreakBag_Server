@@ -3,8 +3,15 @@ const { generatePDF } = require("../service/pdfService");
 
 exports.createQuote = async (req, res) => {
   try {
-    const { travellers, destination, startDate, endDate, numberOfTravellers } =
-      req.body;
+    const {
+      travellers,
+      destination,
+      startDate,
+      endDate,
+      numberOfTravellers,
+      numberChildTravellers,
+      numberOfAdultTravellers,
+    } = req.body;
     const { userId } = req.user;
 
     if (!travellers || travellers.length === 0) {
@@ -44,6 +51,8 @@ exports.createQuote = async (req, res) => {
       endDate,
       duration,
       createdBy: userId,
+      numberChildTravellers,
+      numberOfAdultTravellers,
     });
 
     return res.status(201).json({

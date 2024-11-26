@@ -4,7 +4,7 @@ const travellerController = require("../controllers/travellerController");
 const { protect, restrictTo } = require("../middleware/authMiddleware");
 
 // Create a new Traveller
-router.post("/create", travellerController.createTraveller);
+router.post("/create", protect, travellerController.createTraveller);
 
 // Get all Travellers with Pagination and Search
 router.get("/all", protect, travellerController.getTravellers);
