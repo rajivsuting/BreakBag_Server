@@ -305,6 +305,8 @@ exports.editQuote = async (req, res) => {
       endDate,
       status,
       numberOfTravellers,
+      numberChildTravellers,
+      numberOfAdultTravellers,
     } = req.body;
 
     // Find the existing quote by ID
@@ -368,6 +370,8 @@ exports.editQuote = async (req, res) => {
         ...(duration && { duration }),
         ...(status && { status }),
         ...(numberOfTravellers && { numberOfTravellers }),
+        ...(numberChildTravellers && { numberChildTravellers }),
+        ...(numberOfAdultTravellers && { numberOfAdultTravellers }),
       },
       { new: true } // Return the updated document
     );

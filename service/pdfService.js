@@ -348,6 +348,7 @@ async function generatePDF(
 
       // Calculate the date for the current day
       const currentDayDate = addDays(new Date(startDate), index);
+
       const formattedDate = currentDayDate.toISOString().split("T")[0]; // Format date as YYYY-MM-DD
 
       // Define rectangle dimensions
