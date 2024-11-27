@@ -207,9 +207,9 @@ exports.createIntenerary = async (req, res) => {
     destinationOnly,
     quote,
   } = req.body;
-  const loggedIn = req.user;
+
   try {
-    let travelGuide = await User.findById(loggedIn.userId);
+    let travelGuide = await User.findById(quote.createdBy);
 
     travelGuide = travelGuide.name;
 

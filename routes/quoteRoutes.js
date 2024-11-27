@@ -18,7 +18,7 @@ router.post(
   quoteController.createCommentOnQuote
 );
 
-router.post("/itenerary/generate", protect, quoteController.createIntenerary);
+router.post("/itenerary/generate", quoteController.createIntenerary);
 router.patch("/edit/:id", quoteController.editQuote);
 router.delete("/delete/:id", quoteController.deleteQuote);
 
