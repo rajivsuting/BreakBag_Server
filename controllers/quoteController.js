@@ -195,20 +195,19 @@ exports.createCommentOnQuote = async (req, res) => {
 };
 
 exports.createIntenerary = async (req, res) => {
-  const {
-    travelSummaryPerDay,
-    priceDetails,
-    selectedHotel,
-    selectedExclusions,
-    selectedOtherInformation,
-    selectedTransfers,
-    selectedInclusions,
-    activityPerDay,
-    destinationOnly,
-    quote,
-  } = req.body;
-
   try {
+    const {
+      travelSummaryPerDay,
+      priceDetails,
+      selectedHotel,
+      selectedExclusions,
+      selectedOtherInformation,
+      selectedTransfers,
+      selectedInclusions,
+      activityPerDay,
+      destinationOnly,
+      quote,
+    } = req.body;
     let travelGuide = await User.findById(quote.createdBy);
 
     travelGuide = travelGuide.name;

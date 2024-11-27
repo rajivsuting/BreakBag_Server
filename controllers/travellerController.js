@@ -15,16 +15,15 @@ const handleErrors = (error, res, customMessage = null) => {
 
 // Create a Traveller
 exports.createTraveller = async (req, res) => {
-  const { name, email, phone, address, userType } = req.body;
-  let { agentAssigned } = req.body;
-
-  if (!name || !email || !address) {
-    return res
-      .status(400)
-      .json({ message: "Name, email, and address are required" });
-  }
-
   try {
+    const { name, email, phone, address, userType } = req.body;
+    let { agentAssigned } = req.body;
+
+    if (!name || !email || !address) {
+      return res
+        .status(400)
+        .json({ message: "Name, email, and address are required" });
+    }
     const loggedInUser = req.user; // Assuming req.user is populated by authentication middleware
 
     if (loggedInUser.role === "Agent") {
@@ -78,10 +77,9 @@ exports.createTraveller = async (req, res) => {
 
 // Get all Travellers with Pagination
 exports.getTravellers = async (req, res) => {
-  const { page = 1, limit } = req.query; // Extract pagination parameters
-  const loggedInUser = req.user; // Assuming req.user contains user info like role and id
-
   try {
+    const { page = 1, limit } = req.query; // Extract pagination parameters
+    const loggedInUser = req.user; // Assuming req.user contains user info like role and id
     let travellers;
     let total;
 
@@ -149,9 +147,8 @@ exports.getTravellers = async (req, res) => {
 
 // Get a single Traveller by ID
 exports.getTravellerById = async (req, res) => {
-  const { id } = req.params;
-
   try {
+    const { id } = req.params;
     const traveller = await Traveller.findById(id).lean(); // Performance optimization
     if (!traveller) {
       return res.status(404).json({ message: "Traveller not found" });
@@ -164,10 +161,9 @@ exports.getTravellerById = async (req, res) => {
 
 // Update a Traveller by ID
 exports.updateTraveller = async (req, res) => {
-  const { id } = req.params;
-  const { name, email, phone, address, agentAssigned } = req.body;
-
   try {
+    const { id } = req.params;
+    const { name, email, phone, address, agentAssigned } = req.body;
     // Create an update object with only the fields provided in the request
     const updateData = {};
     if (name) updateData.name = name;
@@ -197,9 +193,9 @@ exports.updateTraveller = async (req, res) => {
 
 // Delete a Traveller by ID
 exports.deleteTraveller = async (req, res) => {
-  const { id } = req.params;
-
   try {
+    const { id } = req.params;
+
     const traveller = await Traveller.findByIdAndDelete(id);
     if (!traveller) {
       return res.status(404).json({ message: "Traveller not found" });
