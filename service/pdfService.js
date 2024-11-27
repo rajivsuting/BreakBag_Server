@@ -10,14 +10,16 @@ async function fetchImage(url) {
   try {
     if (!url) throw new Error("Image URL is invalid or empty.");
 
+    // Fetch image from URL
     const response = await axios.get(url, { responseType: "arraybuffer" });
     if (!response.data || response.data.length === 0) {
       throw new Error("Received empty image buffer.");
     }
 
+    // Resize and process image using sharp
     const processedImage = await sharp(response.data)
-      .resize(1024)
-      .jpeg({ mozjpeg: true })
+      .resize(1024) // Resize image width to 1024px
+      .jpeg({ mozjpeg: true }) // Optimize JPEG compression
       .toBuffer();
 
     return processedImage;
@@ -52,11 +54,10 @@ async function generatePDF(
     // Set up to collect data
     doc.on("data", buffers.push.bind(buffers));
     doc.on("end", async () => {
-      // After generating the main PDF, concatenate with Pdf_1.pdf
       const generatedPdfBuffer = Buffer.concat(buffers);
       const concatenatedPdfBuffer = await concatenatePDFs(generatedPdfBuffer);
 
-      // Send the concatenated PDF as the response
+      // Send the concatenated PDF as response
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
