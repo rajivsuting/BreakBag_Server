@@ -69,31 +69,32 @@ exports.createQuote = async (req, res) => {
 
 exports.getAllQuotes = async (req, res) => {
   try {
-    const { userId } = req.user;
-    const { role } = req.user;
+    const { userId, role } = req.user;
 
-    // console.log("get",req.user)
     let quotes;
     if (role === "Admin") {
+      // Admin fetches all quotes
       quotes = await Quote.find()
+        .sort({ createdAt: -1 }) // Sort by createdAt in descending order
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
         .populate({
           path: "comments.author", // Populate author field within comments
-          select: "name email", // Only retrieve name and email from the User model
+          select: "name email", // Only retrieve name and email from the User model
         })
         .populate("createdBy");
     } else {
+      // Non-admin fetches quotes created by them
       quotes = await Quote.find({ createdBy: userId })
+        .sort({ createdAt: -1 }) // Sort by createdAt in descending order
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
         .populate({
           path: "comments.author", // Populate author field within comments
-          select: "name email", // Only retrieve name and email from the User model
+          select: "name email", // Only retrieve name and email from the User model
         })
         .populate("createdBy");
     }
-    // Fetch all quotes and populate the traveller and destination details
 
     if (!quotes || quotes.length === 0) {
       return res.status(404).json({ message: "No quotes found." });
