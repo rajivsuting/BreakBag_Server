@@ -34,7 +34,8 @@ async function generatePDF(
   transfersProcessData,
   destinationOnly,
   start_Date,
-  end_Date
+  end_Date,
+  travelGuide
 ) {
   try {
     const doc = new PDFDocument({ size: "A4" });
@@ -300,6 +301,7 @@ async function generatePDF(
     const startDate2 = `Start Date : ${startDate}`; // Example start date
     const endDate = `End Date: ${end_Date}`; // Example end date
     const destination = `Destination: ${destinationOnly.title}`; // Example destination
+    const travelGuideName = `Travel Guide: ${travelGuide}`;
 
     // Set font for the new fields
     doc.font("Times-Roman").fontSize(14).fillColor("black");
@@ -317,10 +319,17 @@ async function generatePDF(
     });
 
     // Print End Date
-    doc.text(endDate, padding + 170, textYPosition);
+    doc.text(endDate, padding + 153, textYPosition);
 
     // Print Destination
-    doc.text(destination, padding, doc.y + 10); // Below the End Date
+    doc.text(destination, padding, doc.y + 10, { continued: true });
+
+    // Calculate position for Travel Guide
+    const travelGuideXPosition = padding + 200; // Same as End Date's x position
+    const travelGuideYPosition = textYPosition + 25; // Slightly below the End Date's y position
+
+    // Print Travel Guide
+    doc.text(travelGuideName, travelGuideXPosition, travelGuideYPosition);
 
     // Add a horizontal second line below the destination
     const destinationLineYPosition = doc.y + 15; // Adjust the Y position for the line

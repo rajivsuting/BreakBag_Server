@@ -1,5 +1,6 @@
 const Quote = require("../models/quote");
 const { generatePDF } = require("../service/pdfService");
+const User = require("../models/User");
 
 exports.createQuote = async (req, res) => {
   try {
@@ -206,7 +207,12 @@ exports.createIntenerary = async (req, res) => {
     destinationOnly,
     quote,
   } = req.body;
+  const loggedIn = req.user;
   try {
+    let travelGuide = await User.findById(loggedIn.userId);
+
+    travelGuide = travelGuide.name;
+
     const travelSummaryDemo = travelSummaryPerDay.map((item) => ({
       title: item.summaryDetails.title,
       description: item.summaryDetails.description,
@@ -285,7 +291,8 @@ exports.createIntenerary = async (req, res) => {
       transfersProcessData,
       destinationOnly,
       startDate,
-      endDate
+      endDate,
+      travelGuide
     );
   } catch (error) {
     console.error("Error creating intenerary:", error);
