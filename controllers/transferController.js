@@ -71,12 +71,20 @@ exports.searchTransfersByKeyword = async (req, res) => {
       return res.status(400).json({ message: "Search keywords are required." });
     }
 
-    // Create a case-insensitive regex for substring matching
-    const regex = new RegExp(keywords, "i");
+    // Clean and sanitize keywords
+    const sanitizedKeywords = keywords
+      .trim()
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special regex characters
 
-    // Perform search on 'description' using regex for substring matching
+    // Create a case-insensitive regex for substring matching
+    const regex = new RegExp(sanitizedKeywords, "i");
+
+    // Perform search on 'title' and 'description' using regex for substring matching
     const transfers = await Transfer.find({
-      description: { $regex: regex },
+      $or: [
+        { title: { $regex: regex } }, // Match in 'title'
+        { description: { $regex: regex } }, // Match in 'description'
+      ],
     });
 
     if (!transfers || transfers.length === 0) {
@@ -97,6 +105,7 @@ exports.searchTransfersByKeyword = async (req, res) => {
     });
   }
 };
+
 exports.editTransfer = async (req, res) => {
   try {
     const { id } = req.params; // Get the ID of the transfer to update from the route parameters

@@ -292,7 +292,7 @@ async function generatePDF(
     const startDate2 = `Start Date : ${startDate}`;
     const endDate = `End Date: ${end_Date}`;
     const destination = `Destination: ${destinationOnly.title}`;
-    const travelGuideName = `Travel Guide: ${travelGuide}`;
+    const travelGuideName = `Tour Advisor: ${travelGuide}`;
 
     doc.font("Times-Roman").fontSize(14).fillColor("black");
 
@@ -331,23 +331,33 @@ async function generatePDF(
       return result;
     }
 
+    const daysPerPage = 6; // Maximum number of days to display per page
+    let dayCount1 = 0; // Track the current day number
+
     travelSummaryDemo.forEach((summary, index) => {
       const dayText = `Day ${index + 1}`;
-
       const currentDayDate = addDays(new Date(startDate), index);
-
       const formattedDate = currentDayDate.toISOString().split("T")[0];
-
       const rectHeight = 30;
-      const rectYPosition = currentYPosition;
 
+      // Check if we need to add a new page
+      if (dayCount1 === daysPerPage) {
+        doc.addPage();
+        doc.image(logoImage, doc.page.width - padding - 100, padding, {
+          fit: [100, 100],
+        }); // Add a new page after 6 days
+        currentYPosition = padding + 40; // Reset currentYPosition for the new page
+        dayCount1 = 0; // Reset day count for the new page
+      }
+
+      // Draw the day rectangle
       doc
         .fillColor("#053260")
-        .rect(padding - 5, rectYPosition, dayWidth, rectHeight)
+        .rect(padding - 5, currentYPosition, dayWidth, rectHeight)
         .fill();
 
-      const textYPosition = rectYPosition + rectHeight / 2 + 6;
-
+      // Print the day text
+      const textYPosition = currentYPosition + rectHeight / 2 + 6;
       doc
         .font("Times-Bold")
         .fontSize(18)
@@ -357,6 +367,7 @@ async function generatePDF(
           align: "left",
         });
 
+      // Print the formatted date
       doc
         .font("Times-Bold")
         .fontSize(12)
@@ -366,12 +377,14 @@ async function generatePDF(
           align: "left",
         });
 
+      // Print the title
       doc
         .font("Times-Bold")
         .fontSize(16)
         .fillColor("black")
         .text(summary.title, padding + dayWidth + 20, currentYPosition);
 
+      // Print the description
       doc
         .font("Times-Roman")
         .fontSize(12)
@@ -380,8 +393,10 @@ async function generatePDF(
           width: doc.page.width - padding - (dayWidth + 40),
         });
 
+      // Calculate the height of the current summary
       const summaryHeight = doc.y - currentYPosition + 5;
 
+      // Draw the vertical orange line next to the description
       const lineXPosition = padding + dayWidth + 10;
       const lineStartY = currentYPosition;
       const lineEndY = currentYPosition + summaryHeight;
@@ -389,10 +404,13 @@ async function generatePDF(
         .strokeColor("#ff9c00")
         .moveTo(lineXPosition, lineStartY)
         .lineTo(lineXPosition, lineEndY)
-
         .stroke();
 
+      // Update the Y position for the next day
       currentYPosition = doc.y + 20;
+
+      // Increment the day count
+      dayCount1++;
     });
 
     // --- Add Third Page ---
@@ -440,7 +458,7 @@ async function generatePDF(
     const headerBackgroundColor = "#053260";
     const headerTextColor = "#ffffff";
 
-    const headers = ["User Type", "Price", "Quantity", "Amount"];
+    const headers = ["User Type", "Price", "Pax", "Amount"];
     const columnWidths = [150, 130, 100, 150];
     const rowHeight = 40;
     const startX = padding;
@@ -636,7 +654,7 @@ async function generatePDF(
         .fill();
 
       doc
-        .font("Helvetica-Bold")
+        .font("Times-Bold")
         .fontSize(12)
         .fillColor(headerColor)
         .text(header, x + 5, tableTop + 5, {
@@ -648,7 +666,7 @@ async function generatePDF(
     });
 
     // Draw data rows with borders
-    doc.font("Helvetica").fontSize(10).fillColor("#000");
+    doc.font("Times-Roman").fontSize(10).fillColor("#000");
     hotelData.forEach((hotel, rowIndex) => {
       const rowY = tableTop + rowHeight2 + rowHeight1 * rowIndex;
 
@@ -790,143 +808,167 @@ async function generatePDF(
         )
         .stroke();
     });
-
     let dayCount = 1;
+
     for (const item of detailedIteneraryData) {
-      doc.addPage();
+      try {
+        doc.addPage();
 
-      doc.image(logoImage, doc.page.width - padding - 100, padding, {
-        fit: [100, 100],
-      });
-
-      const rectDayHeight = 40;
-      const rectDayWidth = 120;
-      const rectDayYPosition = doc.page.height - padding - rectDayHeight - 710;
-
-      doc
-        .rect(0, rectDayYPosition, rectDayWidth, rectDayHeight)
-        .fill("#ff9c00");
-
-      doc
-        .font("Times-Bold")
-        .fontSize(24)
-        .fillColor("white")
-        .text(
-          `DAY ${dayCount}`,
-          0,
-          rectDayYPosition + 10 + rectDayHeight / 2 - 9,
-          {
-            width: rectDayWidth,
-            align: "center",
-            baseline: "middle",
-          }
-        );
-      dayCount++;
-
-      let currentY = padding + 100;
-
-      const largeImageWidth = doc.page.width * 0.7 - 2 * padding;
-      const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50;
-      const adjustedHeight = 230;
-      const largeImageHeight = adjustedHeight;
-      const sidebarImageHeight = adjustedHeight / 2.1;
-      const gap = 10;
-
-      doc
-        .rect(padding, currentY, largeImageWidth, largeImageHeight)
-        .fillAndStroke("#f0f0f0", "#ccc");
-
-      const sidebarXPosition = padding + largeImageWidth + gap;
-      doc
-        .rect(sidebarXPosition, currentY, sidebarWidth, sidebarImageHeight)
-        .fillAndStroke("#f0f0f0", "#ccc");
-
-      doc
-        .rect(
-          sidebarXPosition,
-          currentY + sidebarImageHeight + gap,
-          sidebarWidth,
-          sidebarImageHeight
-        )
-        .fillAndStroke("#f0f0f0", "#ccc");
-
-      const largeImageUrl = item.images[0];
-      const largeImageData = await fetchImage(largeImageUrl);
-
-      if (largeImageData) {
-        doc.image(largeImageData, padding, currentY, {
-          width: largeImageWidth,
-          height: largeImageHeight,
+        doc.image(logoImage, doc.page.width - padding - 100, padding, {
+          fit: [100, 100],
         });
-      } else {
-        console.error("Background image not available.");
-      }
 
-      if (item.images[1]) {
-        const sidebarImage1Url = item.images[1];
-        const sidebarImage1Data = await fetchImage(sidebarImage1Url);
-        if (sidebarImage1Data) {
-          doc.image(sidebarImage1Data, sidebarXPosition, currentY, {
-            width: sidebarWidth,
-            height: sidebarImageHeight,
-          });
-        } else {
-          console.error("Background image not available.");
-        }
-      }
+        const rectDayHeight = 40;
+        const rectDayWidth = 120;
+        const rectDayYPosition =
+          doc.page.height - padding - rectDayHeight - 710;
 
-      if (item.images[2]) {
-        const sidebarImage2Url = item.images[2];
-        const sidebarImage2Data = await fetchImage(sidebarImage2Url);
+        doc
+          .rect(0, rectDayYPosition, rectDayWidth, rectDayHeight)
+          .fill("#ff9c00");
 
-        if (sidebarImage2Data) {
-          doc.image(
-            sidebarImage2Data,
-            sidebarXPosition,
-            currentY + sidebarImageHeight + gap,
+        doc
+          .font("Times-Bold")
+          .fontSize(24)
+          .fillColor("white")
+          .text(
+            `DAY ${dayCount}`,
+            0,
+            rectDayYPosition + 10 + rectDayHeight / 2 - 9,
             {
-              width: sidebarWidth,
-              height: sidebarImageHeight,
+              width: rectDayWidth,
+              align: "center",
+              baseline: "middle",
             }
           );
-        } else {
-          console.error("Background image not available.");
+        dayCount++;
+
+        let currentY = padding + 100;
+
+        const largeImageWidth = doc.page.width * 0.7 - 2 * padding;
+        const sidebarWidth = doc.page.width * 0.3 - 2 * padding + 50;
+        const adjustedHeight = 230;
+        const largeImageHeight = adjustedHeight;
+        const sidebarImageHeight = adjustedHeight / 2.1;
+        const gap = 10;
+
+        doc
+          .rect(padding, currentY, largeImageWidth, largeImageHeight)
+          .fillAndStroke("#f0f0f0", "#ccc");
+
+        const sidebarXPosition = padding + largeImageWidth + gap;
+        doc
+          .rect(sidebarXPosition, currentY, sidebarWidth, sidebarImageHeight)
+          .fillAndStroke("#f0f0f0", "#ccc");
+
+        doc
+          .rect(
+            sidebarXPosition,
+            currentY + sidebarImageHeight + gap,
+            sidebarWidth,
+            sidebarImageHeight
+          )
+          .fillAndStroke("#f0f0f0", "#ccc");
+
+        // Ensure `item.images` exists and has elements
+        if (item.images && item.images[0]) {
+          const largeImageUrl = item.images[0];
+          const largeImageData = await fetchImage(largeImageUrl);
+
+          if (largeImageData) {
+            doc.image(largeImageData, padding, currentY, {
+              width: largeImageWidth,
+              height: largeImageHeight,
+            });
+          } else {
+            console.error("Large image not available.");
+          }
         }
+
+        if (item.images && item.images[1]) {
+          const sidebarImage1Url = item.images[1];
+          const sidebarImage1Data = await fetchImage(sidebarImage1Url);
+          if (sidebarImage1Data) {
+            doc.image(sidebarImage1Data, sidebarXPosition, currentY, {
+              width: sidebarWidth,
+              height: sidebarImageHeight,
+            });
+          } else {
+            console.error("Sidebar image 1 not available.");
+          }
+        }
+
+        if (item.images && item.images[2]) {
+          const sidebarImage2Url = item.images[2];
+          const sidebarImage2Data = await fetchImage(sidebarImage2Url);
+
+          if (sidebarImage2Data) {
+            doc.image(
+              sidebarImage2Data,
+              sidebarXPosition,
+              currentY + sidebarImageHeight + gap,
+              {
+                width: sidebarWidth,
+                height: sidebarImageHeight,
+              }
+            );
+          } else {
+            console.error("Sidebar image 2 not available.");
+          }
+        }
+
+        currentY += largeImageHeight + 40;
+
+        doc.font("Times-Bold").fontSize(24).fillColor("#053260");
+
+        if (item.title) {
+          const titleHeight = doc.heightOfString(item.title, {
+            width: doc.page.width - 2 * padding,
+            align: "left",
+          });
+
+          doc.text(item.title, padding, currentY, {
+            align: "left",
+            width: doc.page.width - 2 * padding,
+          });
+          currentY += titleHeight + 10;
+        }
+
+        const maxWidth = doc.page.width - 2 * padding - 20;
+        const bulletPointIndent = 35;
+        const descriptionIndent = bulletPointIndent + 10;
+
+        if (item.description && Array.isArray(item.description)) {
+          item.description.forEach((desc) => {
+            const bulletPoint = "• ";
+
+            // Calculate the height required for the current description
+            const descHeight = doc.heightOfString(desc, { width: maxWidth });
+
+            // Check if the description fits on the current page
+            if (currentY + descHeight + 40 > doc.page.height - padding) {
+              doc.addPage(); // Add a new page if it doesn't fit
+              doc.image(logoImage, doc.page.width - padding - 100, padding, {
+                fit: [100, 100],
+              });
+              currentY = padding + 45; // Reset Y position for the new page
+            }
+
+            doc.font("Times-Roman").fontSize(14).fillColor("black");
+            doc.text(bulletPoint, bulletPointIndent, currentY);
+
+            doc.text(desc, descriptionIndent, currentY, {
+              width: maxWidth,
+              lineGap: 5,
+            });
+
+            const itemHeight = doc.heightOfString(desc, { width: maxWidth });
+            currentY += itemHeight + 19;
+          });
+        }
+      } catch (error) {
+        console.error("Error processing item:", error.message);
       }
-
-      currentY += largeImageHeight + 40;
-
-      doc.font("Times-Bold").fontSize(24).fillColor("#053260");
-
-      const titleHeight = doc.heightOfString(item.title, {
-        width: doc.page.width - 2 * padding,
-        align: "left",
-      });
-
-      doc.text(item.title, padding, currentY, {
-        align: "left",
-        width: doc.page.width - 2 * padding,
-      });
-      currentY += titleHeight + 10;
-
-      const maxWidth = doc.page.width - 2 * padding - 20;
-      const bulletPointIndent = 35;
-      const descriptionIndent = bulletPointIndent + 10;
-
-      item.description.forEach((desc) => {
-        const bulletPoint = "• ";
-
-        doc.font("Times-Roman").fontSize(14).fillColor("black");
-        doc.text(bulletPoint, bulletPointIndent, currentY);
-
-        doc.text(desc, descriptionIndent, currentY, {
-          width: maxWidth,
-          lineGap: 5,
-        });
-
-        const itemHeight = doc.heightOfString(desc, { width: maxWidth });
-        currentY += itemHeight + 19;
-      });
     }
 
     // --------TRIP Inclusion ---------------------------
