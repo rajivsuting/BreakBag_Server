@@ -16,3 +16,4 @@ router.put("/edit/:id", upload.single("image"), editDestination);
 router.delete("/delete/:id", deleteDestination);
 
 module.exports = router;
+// http://139.59.89.255:8080/api/destination/destinaions

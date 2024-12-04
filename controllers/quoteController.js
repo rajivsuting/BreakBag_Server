@@ -1,6 +1,7 @@
 const Quote = require("../models/quote");
 const { generatePDF } = require("../service/pdfService");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 exports.createQuote = async (req, res) => {
   try {
@@ -71,11 +72,14 @@ exports.createQuote = async (req, res) => {
 exports.getAllQuotes = async (req, res) => {
   try {
     const { userId, role } = req.user;
+    const { page, limit } = req.query;
 
-    let quotes;
+    let quotesQuery;
+
+    // Build the base query
     if (role === "Admin") {
       // Admin fetches all quotes
-      quotes = await Quote.find()
+      quotesQuery = Quote.find()
         .sort({ createdAt: -1 }) // Sort by createdAt in descending order
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
@@ -86,7 +90,7 @@ exports.getAllQuotes = async (req, res) => {
         .populate("createdBy");
     } else {
       // Non-admin fetches quotes created by them
-      quotes = await Quote.find({ createdBy: userId })
+      quotesQuery = Quote.find({ createdBy: userId })
         .sort({ createdAt: -1 }) // Sort by createdAt in descending order
         .populate("travellers", "name email") // Populate traveller's name and email
         .populate("destination", "title")
@@ -97,11 +101,55 @@ exports.getAllQuotes = async (req, res) => {
         .populate("createdBy");
     }
 
+    // Apply pagination if both `page` and `limit` are provided
+    if (page && limit) {
+      const pageNumber = parseInt(page, 10);
+      const limitNumber = parseInt(limit, 10);
+
+      if (
+        isNaN(pageNumber) ||
+        isNaN(limitNumber) ||
+        pageNumber <= 0 ||
+        limitNumber <= 0
+      ) {
+        return res.status(400).json({
+          message:
+            "Invalid pagination parameters. 'page' and 'limit' must be positive numbers.",
+        });
+      }
+
+      const skip = (pageNumber - 1) * limitNumber;
+      const totalQuotes = await Quote.countDocuments(
+        role === "Admin" ? {} : { createdBy: userId }
+      );
+      const totalPages = Math.ceil(totalQuotes / limitNumber);
+
+      // Paginate the query
+      quotesQuery = quotesQuery.skip(skip).limit(limitNumber);
+
+      const quotes = await quotesQuery;
+
+      return res.status(200).json({
+        message: "Quotes retrieved successfully",
+        data: {
+          quotes,
+          pagination: {
+            totalQuotes,
+            totalPages,
+            currentPage: pageNumber,
+            pageSize: limitNumber,
+          },
+        },
+      });
+    }
+
+    // If no pagination is provided, return all quotes
+    const quotes = await quotesQuery;
+
     if (!quotes || quotes.length === 0) {
       return res.status(404).json({ message: "No quotes found." });
     }
 
-    // Send a success response with the retrieved data
     return res.status(200).json({
       message: "Quotes retrieved successfully",
       data: quotes,
@@ -418,6 +466,106 @@ exports.deleteQuote = async (req, res) => {
     console.error("Error deleting quote:", err);
     return res.status(500).json({
       message: "Error deleting quote",
+      error: err.message,
+    });
+  }
+};
+
+exports.searchByTravellerNameOrTripId = async (req, res) => {
+  try {
+    const { search } = req.query;
+
+    if (!search || search.trim() === "") {
+      return res
+        .status(400)
+        .json({ message: "Search query must not be empty." });
+    }
+
+    // Perform a case-insensitive substring search
+    const quotes = await Quote.aggregate([
+      // Lookup travellers to include their names and emails
+      {
+        $lookup: {
+          from: "travellers", // Collection name for the `Traveller` model
+          localField: "travellers",
+          foreignField: "_id",
+          as: "travellerDetails",
+        },
+      },
+      // Add a computed field to transform traveller names into a single string
+      {
+        $addFields: {
+          travellerNames: {
+            $reduce: {
+              input: {
+                $map: {
+                  input: "$travellerDetails",
+                  as: "traveller",
+                  in: "$$traveller.name", // Extract traveller names
+                },
+              },
+              initialValue: "",
+              in: {
+                $concat: [
+                  "$$value",
+                  { $cond: [{ $eq: ["$$value", ""] }, "", " "] },
+                  "$$this",
+                ],
+              },
+            },
+          },
+        },
+      },
+      // Add fields for matching travellerNames or tripId
+      {
+        $addFields: {
+          matchesTravellerName: {
+            $regexMatch: {
+              input: "$travellerNames",
+              regex: new RegExp(search, "i"), // Case-insensitive search
+            },
+          },
+          matchesTripId: {
+            $regexMatch: {
+              input: "$tripId", // Match the tripId field
+              regex: new RegExp(search, "i"),
+            },
+          },
+        },
+      },
+      // Filter where either `matchesTravellerName` or `matchesTripId` is true
+      {
+        $match: {
+          $or: [{ matchesTravellerName: true }, { matchesTripId: true }],
+        },
+      },
+    ]);
+
+    // Populate additional fields as required
+    const populatedQuotes = await Quote.populate(quotes, [
+      { path: "travellers", select: "name email" },
+      { path: "destination", select: "title" },
+      {
+        path: "comments.author",
+        select: "name email",
+      },
+      { path: "createdBy" },
+    ]);
+
+    if (!populatedQuotes || populatedQuotes.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No quotes found matching the search criteria." });
+    }
+
+    return res.status(200).json({
+      message: "Quotes retrieved successfully",
+      data: populatedQuotes,
+    });
+  } catch (err) {
+    console.error("Error searching for quotes:", err);
+    return res.status(500).json({
+      message: "Error searching for quotes",
       error: err.message,
     });
   }

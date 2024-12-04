@@ -21,5 +21,5 @@ router.post(
 router.post("/itenerary/generate", quoteController.createIntenerary);
 router.patch("/edit/:id", quoteController.editQuote);
 router.delete("/delete/:id", quoteController.deleteQuote);
-
+router.get("/search", quoteController.searchByTravellerNameOrTripId);
 module.exports = router;
